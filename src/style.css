@@ -1,0 +1,184 @@
+/* Reset and global styles */
+* {
+  box-sizing: border-box;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: #f1f2f5;
+}
+
+/* Chat container */
+#chatContainer {
+  position: fixed;
+  bottom: 100px;
+  right: 30px;
+  width: 360px;
+  height: 500px;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #ddd;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 10000;
+}
+
+/* Chat area */
+#chat {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  background: #f9f9f9;
+}
+
+/* Input area */
+#inputArea {
+  display: flex;
+  padding: 12px;
+  border-top: 1px solid #eee;
+  background: #fff;
+}
+
+/* Text input */
+#input {
+  flex: 1;
+  padding: 12px 16px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 24px;
+  outline: none;
+  transition: border 0.2s ease;
+}
+
+#input:focus {
+  border-color: #007bff;
+}
+
+/* Send button */
+#sendBtn {
+  margin-left: 8px;
+  padding: 12px 18px;
+  font-size: 16px;
+  border: none;
+  border-radius: 24px;
+  background: #007bff;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+#sendBtn:hover {
+  background: #0056c6;
+}
+
+#sendBtn:disabled {
+  background-color: #aaa;
+  cursor: not-allowed;
+}
+
+/* Chat bubble toggle button */
+#chatBubble {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 64px;
+  height: 64px;
+  background: #007bff;
+  border-radius: 50%;
+  color: white;
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  z-index: 10001;
+  transition: background 0.3s ease;
+}
+
+#chatBubble:hover {
+  background: #0056c6;
+}
+
+/* Messages */
+.message {
+  display: flex;
+  margin-bottom: 12px;
+  line-height: 1.4;
+  max-width: 100%;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  font-size: 15px;
+  gap: 0.8rem;
+}
+
+/* Message alignment */
+.message.user {
+  justify-content: flex-end;
+}
+
+.message.bot {
+  justify-content: flex-start;
+}
+
+/* Message bubbles */
+.message .bubble {
+  padding: 10px 16px;
+  border-radius: 20px;
+}
+
+.message.user .bubble {
+  background: #007bff;
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.message.bot .bubble {
+  background: #e4e6eb;
+  color: #333;
+  border-bottom-left-radius: 4px;
+}
+
+/* Additional message styles for flex alignment */
+.message.user {
+  justify-content: flex-end;
+}
+
+.message.bot {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* align to left */
+}
+
+/* Quick replies container directly under bot message bubble */
+.message.bot .quick-replies {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+
+/* Style quick reply buttons (optional, uncomment if you want) */
+.quick-reply-btn {
+  background-color: #007bff;
+  color:white;
+  border: 1px solid #ccc;
+  border-radius: 18px;
+  padding: 6px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  user-select: none;
+}
+
+.quick-reply-btn:hover {
+  background-color: #007bff85;
+}
+
+.quick-reply-btn:active {
+  background-color: #007bff85;
+}
