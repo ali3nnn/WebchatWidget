@@ -10,6 +10,30 @@ body {
   background: #f1f2f5;
 }
 
+/* Chatbot Header */
+#header {
+  background: #007bff;
+  color: white;
+  padding: 16px;
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+  border-bottom: 1px solid #0056c6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+#header span {
+  display: inline-block;
+}
+
+#header::before {
+  content: '🤖';
+  font-size: 20px;
+}
+
 /* Chat container */
 #chatContainer {
   position: fixed;
@@ -21,10 +45,14 @@ body {
   border-radius: 16px;
   border: 1px solid #ddd;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-  display: none;
   flex-direction: column;
   overflow: hidden;
   z-index: 10000;
+  display: none;
+}
+
+#chatContainer.webchat-visible {
+  display: flex;
 }
 
 /* Chat area */

@@ -18,18 +18,52 @@ type ChatUI = {
   chatBubble: HTMLDivElement;
 };
 
+interface EndpointSettings {
+  flow: string;
+  chatbotName: string;
+  colors: {
+    header: string;
+    message: {
+      user: string;
+    }
+  };
+  inputFieldMessage: string;
+}
+
 function log(...args: unknown[]) {
   console.log('[webchat.ts]', ...args);
 }
 
-function createChatUI(): ChatUI {
+function createChatUI(settings: EndpointSettings): ChatUI {
+
+  const style = document.createElement('style');
+  style.textContent = `
+    #chatContainer #header {
+      background: ${settings.colors.header}
+    }
+    #chatContainer #sendBtn {
+      background: ${settings.colors.header}
+    }
+
+    #chatContainer #sendBtn:hover {
+      opacity: 0.8;
+      background: ${settings.colors.header}
+    }
+
+    #chatContainer .message.user .bubble {
+      background: ${settings.colors.message.user}
+    }
+  `;
+  document.head.appendChild(style);
+
   const chatContainer = document.createElement('div');
   chatContainer.id = 'chatContainer';
-  chatContainer.style.display = 'none';
   chatContainer.innerHTML = `
-    <div id="chat" class="chat-box"></div>
+    <div id="header"><span>${settings.chatbotName}</span></div>
+    <div id="chat" class="chat-box">
+    </div>
     <div id="inputArea" class="input-area">
-      <input id="input" type="text" placeholder="Type your message..." autocomplete="off" />
+      <input id="input" type="text" placeholder="${settings.inputFieldMessage}" autocomplete="off" />
       <button id="sendBtn" disabled>Send</button>
     </div>
   `;
@@ -128,11 +162,12 @@ function attachEventListeners(ui: ChatUI, socket: Socket) {
     if (e.key === 'Enter') sendMessage(ui, socket);
   });
 
-  ui.chatBubble.addEventListener('click', () => {
-    const isOpen = ui.chatContainer.style.display === 'flex';
-    ui.chatContainer.style.display = isOpen ? 'none' : 'flex';
-    if (!isOpen) ui.input.focus();
-  });
+  // ui.chatBubble.addEventListener('click', () => {
+  //   const isOpen = ui.chatContainer.style.display === 'flex';
+  //   ui.chatContainer.style.display = isOpen ? 'none' : 'flex';
+  //   if (!isOpen) ui.input.focus();
+  // });
+
 }
 
 function sendMessage(ui: ChatUI, socket: Socket) {
@@ -144,26 +179,56 @@ function sendMessage(ui: ChatUI, socket: Socket) {
   ui.input.focus();
 }
 
-export function initWebchat(endpointURL: string) {
+export async function initWebchat(endpointURL: string) {
   if (!endpointURL) {
     console.error('⚠️ You must provide the full WebSocket URL to initWebchat()');
     return;
   }
 
   const url = new URL(endpointURL);
-  const basePath = url.origin + url.pathname;
-  const params = Object.fromEntries(url.searchParams.entries());
+  // const basePath = url.origin + url.pathname;
+  const basePath = url.origin;
+  // const { endpointID } = Object.fromEntries(url.searchParams.entries());
+  const endpointID = url.pathname.replace("/", "");
 
-  if (!params.endpointID) {
+  if (!endpointID) {
     console.error('⚠️ Missing "endpointID" in the query parameters.');
+    return;
+  }
+
+  let endpointSettings;
+  try {
+    const response = await fetch(endpointURL);
+    if (!response.ok) {
+      throw new Error(`GET request failed with status ${response.status}`);
+    }
+    const data = await response.json();
+    endpointSettings = data.settings;
+  } catch (error) {
+    console.error('❌ Error making GET request:', error);
     return;
   }
 
   log('Initializing Webchat');
 
-  const ui = createChatUI();
-  const socket = setupSocketConnection(basePath, params.endpointID, ui);
-  attachEventListeners(ui, socket);
+  const ui = createChatUI(endpointSettings);
+  let socket: Socket | null = null;
+
+  const getOrCreateSocket = (): Socket => {
+    if (socket) return socket;
+    socket = setupSocketConnection(basePath, endpointID, ui);
+    attachEventListeners(ui, socket);
+    return socket;
+  };
+
+  ui.chatBubble.addEventListener('click', () => {
+    ui.chatContainer.classList.toggle('webchat-visible');
+    const isOpen = ui.chatContainer.classList.contains('webchat-visible');
+    if (isOpen) {
+      ui.input.focus();
+      getOrCreateSocket();
+    }
+  });
 }
 
 declare global {
