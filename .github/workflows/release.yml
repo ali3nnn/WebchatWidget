@@ -24,7 +24,7 @@ jobs:
         run: npm ci
 
       - name: Build project
-        run: npm run build-parcel
+        run: npm run build
 
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v1

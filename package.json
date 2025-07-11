@@ -4,11 +4,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build-rollup": "rollup -c",
-    "build-parcel": "parcel build src/webchat.js --dist-dir dist --no-source-maps",
-    "watch-parcel": "parcel watch src/webchat.js --dist-dir dist --no-source-maps",
-    "build": "node bundle.js",
-    "watch": "esbuild src/webchat.ts --bundle --outfile=dist/webchat.js --loader:.css=text --format=iife --sourcemap --watch"
+    "watch": "esbuild src/webchat.ts --bundle --outfile=dist/webchat.js --loader:.css=text --format=iife --sourcemap --watch",
+    "build": "esbuild src/webchat.ts --bundle --outfile=dist/webchat.js --loader:.css=text --format=iife --sourcemap"
   },
   "keywords": [],
   "author": "",
