@@ -3,29 +3,27 @@ name: Build and Release Webchat
 on:
   push:
     tags:
-      - 'v*'  # Trigger only on tags matching v*
+      - 'v*'
+
+permissions:
+  contents: write
 
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      - name: Install dependencies
-        run: npm ci
+      - run: npm ci
 
-      - name: Build project
-        run: npm run build
+      - run: npm run build-parcel
 
-      - name: Create GitHub Release and upload asset
-        uses: softprops/action-gh-release@v1
+      - uses: softprops/action-gh-release@v1
         with:
           files: dist/webchat.js
         env:
