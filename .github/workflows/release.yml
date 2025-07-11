@@ -2,13 +2,11 @@ name: Build and Release Webchat
 
 on:
   push:
-    branches:
-      - main
     tags:
-      - 'v*'  # Create releases on version tags like v1.0.0
+      - 'v*'  # Trigger only on tags matching v*
 
 jobs:
-  build:
+  build-and-release:
     runs-on: ubuntu-latest
 
     steps:
@@ -24,9 +22,9 @@ jobs:
         run: npm ci
 
       - name: Build project
-        run: npm run build
+        run: npm run build-parcel
 
-      - name: Upload Release Asset
+      - name: Create GitHub Release and upload asset
         uses: softprops/action-gh-release@v1
         with:
           files: dist/webchat.js
