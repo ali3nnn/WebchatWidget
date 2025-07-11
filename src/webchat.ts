@@ -28,6 +28,7 @@ interface EndpointSettings {
     }
   };
   inputFieldMessage: string;
+  sendButton: string;
 }
 
 function log(...args: unknown[]) {
@@ -64,7 +65,7 @@ function createChatUI(settings: EndpointSettings): ChatUI {
     </div>
     <div id="inputArea" class="input-area">
       <input id="input" type="text" placeholder="${settings.inputFieldMessage}" autocomplete="off" />
-      <button id="sendBtn" disabled>Send</button>
+      <button id="sendBtn" disabled>${settings.sendButton}</button>
     </div>
   `;
 
