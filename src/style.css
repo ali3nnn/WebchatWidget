@@ -263,7 +263,6 @@ body {
   cursor: pointer;
   transition: all var(--transition-normal);
   font-weight: 600;
-  min-width: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -589,7 +588,6 @@ body {
   #sendBtn {
     padding: var(--spacing-md) var(--spacing-lg);
     font-size: 14px;
-    min-width: 70px;
   }
 }
 
