@@ -69,7 +69,7 @@ body {
     0 8px 16px rgba(0, 0, 0, 0.06);
   flex-direction: column;
   overflow: hidden;
-  z-index: 10000;
+  z-index: 10002;
   display: none;
   border: 1px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(10px);
@@ -347,12 +347,16 @@ body {
 }
 
 /* Responsive Design */
-@media (max-width: 480px) {
+@media (max-width: 600px) {
   #chatContainer {
-    width: calc(100vw - 40px);
-    height: calc(100vh - 200px);
-    right: 20px;
-    bottom: 80px;
+    width: 100vw;
+    height: 100vh;
+    right: 0;
+    bottom: 0;
+    border-radius: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
   }
   
   #chatBubble {
@@ -366,6 +370,35 @@ body {
   #header {
     padding: 16px 20px;
     font-size: 15px;
+    position: relative;
+  }
+  
+  /* Close button for mobile */
+  .close-btn {
+    position: absolute;
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: 2px solid transparent;
+    border-radius: 50%;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 10;
+    font-weight: bold;
+    line-height: 1;
+    padding: 0;
+  }
+  
+  .close-btn:hover {
+    /* No hover effects */
   }
   
   #inputArea {

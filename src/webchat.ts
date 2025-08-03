@@ -101,8 +101,15 @@ function createChatUI(settings: EndpointSettings): ChatUI {
 
   const chatContainer = document.createElement('div');
   chatContainer.id = 'chatContainer';
+  
+  // Check if we're on mobile (width < 600px)
+  const isMobile = window.innerWidth < 600;
+  
   chatContainer.innerHTML = `
-    <div id="header"><span>${settings.chatbotName}</span></div>
+    <div id="header">
+      <span>${settings.chatbotName}</span>
+      ${isMobile ? '<button class="close-btn">×</button>' : ''}
+    </div>
     <div id="chat" class="chat-box">
     </div>
     <div id="inputArea" class="input-area">
@@ -117,6 +124,17 @@ function createChatUI(settings: EndpointSettings): ChatUI {
 
   document.body.appendChild(chatBubble);
   document.body.appendChild(chatContainer);
+
+  // Add close button functionality for mobile
+  if (isMobile) {
+    const closeBtn = chatContainer.querySelector('.close-btn') as HTMLButtonElement;
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        chatContainer.classList.remove('webchat-visible');
+        chatBubble.classList.remove('stop-animation');
+      });
+    }
+  }
 
   return {
     chatContainer,
@@ -159,6 +177,17 @@ function setupSocketConnection(basePath: string, endpointID: string, ui: ChatUI)
   return socket;
 }
 
+// Global message queue for typewriter effect
+let messageQueue: Array<{
+  chatElement: HTMLElement;
+  text: string;
+  sender: 'user' | 'bot';
+  quickReplies: string[];
+  socket?: Socket;
+  ui?: ChatUI;
+}> = [];
+let isTyping = false;
+
 function addMessage(
   chatElement: HTMLElement,
   text: string,
@@ -167,36 +196,101 @@ function addMessage(
   socket?: Socket,
   ui?: ChatUI
 ) {
+  // Add message to queue
+  messageQueue.push({
+    chatElement,
+    text,
+    sender,
+    quickReplies,
+    socket,
+    ui
+  });
+
+  // Process queue if not currently typing
+  if (!isTyping) {
+    processMessageQueue();
+  }
+}
+
+function processMessageQueue() {
+  if (messageQueue.length === 0 || isTyping) {
+    return;
+  }
+
+  const message = messageQueue.shift()!;
+  isTyping = true;
+
   const wrapper = document.createElement('div');
-  wrapper.className = `message ${sender}`;
+  wrapper.className = `message ${message.sender}`;
 
   const bubble = document.createElement('div');
   bubble.className = 'bubble';
-  bubble.textContent = text;
-  wrapper.appendChild(bubble);
+  
+  if (message.sender === 'bot') {
+    // Add typewriter effect for bot messages
+    typewriterEffect(bubble, message.text, () => {
+      // Add quick replies after typing is complete
+      if (message.quickReplies.length > 0 && message.socket && message.ui) {
+        const qrContainer = document.createElement('div');
+        qrContainer.className = 'quick-replies';
 
-  if (sender === 'bot' && quickReplies.length > 0 && socket && ui) {
-    const qrContainer = document.createElement('div');
-    qrContainer.className = 'quick-replies';
+        message.quickReplies.forEach(reply => {
+          const btn = document.createElement('button');
+          btn.className = 'quick-reply-btn';
+          btn.textContent = reply;
+          btn.addEventListener('click', () => {
+            addMessage(message.ui!.chat, reply, 'user');
+            message.socket!.emit('message', reply);
+            message.ui!.input.value = '';
+            message.ui!.input.focus();
+          });
+          qrContainer.appendChild(btn);
+        });
 
-    quickReplies.forEach(reply => {
-      const btn = document.createElement('button');
-      btn.className = 'quick-reply-btn';
-      btn.textContent = reply;
-      btn.addEventListener('click', () => {
-        addMessage(ui.chat, reply, 'user');
-        socket.emit('message', reply);
-        ui.input.value = '';
-        ui.input.focus();
-      });
-      qrContainer.appendChild(btn);
+        wrapper.appendChild(qrContainer);
+      }
+      
+      // Mark typing as complete and process next message
+      isTyping = false;
+      processMessageQueue();
     });
-
-    wrapper.appendChild(qrContainer);
+  } else {
+    // User messages appear immediately
+    bubble.textContent = message.text;
+    isTyping = false;
+    processMessageQueue();
   }
+  
+  wrapper.appendChild(bubble);
+  message.chatElement.appendChild(wrapper);
+  message.chatElement.scrollTop = message.chatElement.scrollHeight;
+}
 
-  chatElement.appendChild(wrapper);
-  chatElement.scrollTop = chatElement.scrollHeight;
+function typewriterEffect(element: HTMLElement, text: string, onComplete?: () => void) {
+  let index = 0;
+  const speed = 20; // milliseconds per character
+  
+  function typeNextChar() {
+    if (index < text.length) {
+      element.textContent += text[index];
+      index++;
+      
+      // Auto-scroll to bottom as text is being typed
+      const chatElement = element.closest('#chat');
+      if (chatElement) {
+        chatElement.scrollTop = chatElement.scrollHeight;
+      }
+      
+      setTimeout(typeNextChar, speed);
+    } else {
+      if (onComplete) {
+        onComplete();
+      }
+    }
+  }
+  
+  // Start typing
+  typeNextChar();
 }
 
 function attachEventListeners(ui: ChatUI, socket: Socket) {
