@@ -25,7 +25,8 @@ interface EndpointSettings {
     header: string;
     message: {
       user: string;
-    }
+    };
+    chatBubble?: string;
   };
   inputFieldMessage: string;
   sendButton: string;
@@ -37,22 +38,63 @@ function log(...args: unknown[]) {
 
 function createChatUI(settings: EndpointSettings): ChatUI {
 
+  // Helper function to create gradient from a single color
+  const createGradient = (color: string) => {
+    // If it's already a gradient, return as is
+    if (color.includes('gradient') || color.includes('linear-gradient')) {
+      return color;
+    }
+    
+    // Handle HSL colors
+    if (color.includes('hsl')) {
+      const hslMatch = color.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+      if (hslMatch) {
+        const [, h, s, l] = hslMatch;
+        const hue = parseInt(h);
+        const saturation = parseInt(s);
+        const lightness = parseInt(l);
+        
+        // Create 20% lighter version
+        const lighterLightness = Math.min(100, lightness * 1.9);
+        
+        return `linear-gradient(135deg, hsl(${hue}, ${saturation}%, ${lighterLightness}%) 0%, ${color} 100%)`;
+      }
+    }
+    
+    // Handle hex colors (fallback)
+    const lighterColor = color.replace('#', '').match(/.{2}/g)?.map(hex => {
+      const num = parseInt(hex, 16);
+      const lighter = Math.min(255, num + Math.round(num * 0.2));
+      return lighter.toString(16).padStart(2, '0');
+    }).join('') || color;
+    
+    return `linear-gradient(135deg, #${lighterColor} 0%, ${color} 100%)`;
+  };
+
+  const headerGradient = createGradient(settings.colors.header);
+  const userMessageGradient = createGradient(settings.colors.message.user);
+  const chatBubbleGradient = createGradient(settings.colors.chatBubble || settings.colors.header);
+
   const style = document.createElement('style');
   style.textContent = `
     #chatContainer #header {
-      background: ${settings.colors.header}
+      background: ${headerGradient}
     }
     #chatContainer #sendBtn {
-      background: ${settings.colors.header}
+      background: ${headerGradient}
     }
 
     #chatContainer #sendBtn:hover {
       opacity: 0.8;
-      background: ${settings.colors.header}
+      background: ${headerGradient}
     }
 
     #chatContainer .message.user .bubble {
-      background: ${settings.colors.message.user}
+      background: ${userMessageGradient}
+    }
+
+    #chatBubble {
+      background: ${chatBubbleGradient} !important;
     }
   `;
   document.head.appendChild(style);
@@ -225,9 +267,13 @@ export async function initWebchat(endpointURL: string) {
   ui.chatBubble.addEventListener('click', () => {
     ui.chatContainer.classList.toggle('webchat-visible');
     const isOpen = ui.chatContainer.classList.contains('webchat-visible');
+    
     if (isOpen) {
+      ui.chatBubble.classList.add('stop-animation');
       ui.input.focus();
       getOrCreateSocket();
+    } else {
+      ui.chatBubble.classList.remove('stop-animation');
     }
   });
 }
