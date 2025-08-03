@@ -116,6 +116,7 @@ function createChatUI(settings: EndpointSettings): ChatUI {
       <input id="input" type="text" placeholder="${settings.inputFieldMessage}" autocomplete="off" />
       <button id="sendBtn" disabled>${settings.sendButton}</button>
     </div>
+    <div class="powered-by">Powered by Lexoft</div>
   `;
 
   const chatBubble = document.createElement('div');

@@ -127,6 +127,17 @@ body {
   align-items: center;
 }
 
+/* Powered by Lexoft */
+.powered-by {
+  padding: 8px 20px;
+  font-size: 11px;
+  color: #a0aec0;
+  text-align: center;
+  background: #f8fafc;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  font-weight: 400;
+}
+
 /* Modern Text Input */
 #input {
   flex: 1;
