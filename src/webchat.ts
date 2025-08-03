@@ -30,6 +30,8 @@ interface EndpointSettings {
   };
   inputFieldMessage: string;
   sendButton: string;
+  chatBubbleMessage?: string;
+  chatBubbleTheme?: string;
 }
 
 function log(...args: unknown[]) {
@@ -55,7 +57,7 @@ function createChatUI(settings: EndpointSettings): ChatUI {
         const lightness = parseInt(l);
         
         // Create 20% lighter version
-        const lighterLightness = Math.min(100, lightness * 1.9);
+        const lighterLightness = Math.min(100, lightness * 1.4);
         
         return `linear-gradient(135deg, hsl(${hue}, ${saturation}%, ${lighterLightness}%) 0%, ${color} 100%)`;
       }
@@ -75,29 +77,16 @@ function createChatUI(settings: EndpointSettings): ChatUI {
   const userMessageGradient = createGradient(settings.colors.message.user);
   const chatBubbleGradient = createGradient(settings.colors.chatBubble || settings.colors.header);
 
-  const style = document.createElement('style');
-  style.textContent = `
-    #chatContainer #header {
-      background: ${headerGradient}
-    }
-    #chatContainer #sendBtn {
-      background: ${headerGradient}
-    }
-
-    #chatContainer #sendBtn:hover {
-      opacity: 0.8;
-      background: ${headerGradient}
-    }
-
-    #chatContainer .message.user .bubble {
-      background: ${userMessageGradient}
-    }
-
-    #chatBubble {
-      background: ${chatBubbleGradient} !important;
-    }
-  `;
-  document.head.appendChild(style);
+  // Update CSS root variables
+  const root = document.documentElement;
+  root.style.setProperty('--header-bg', headerGradient);
+  root.style.setProperty('--user-message-bg', userMessageGradient);
+  root.style.setProperty('--chat-bubble-bg', chatBubbleGradient);
+  
+  // Set default colors from settings
+  root.style.setProperty('--header-default-bg', settings.colors.header);
+  root.style.setProperty('--user-message-default-bg', settings.colors.message.user);
+  root.style.setProperty('--chat-bubble-default-bg', settings.colors.chatBubble || settings.colors.header);
 
   const chatContainer = document.createElement('div');
   chatContainer.id = 'chatContainer';
@@ -114,17 +103,60 @@ function createChatUI(settings: EndpointSettings): ChatUI {
     </div>
     <div id="inputArea" class="input-area">
       <input id="input" type="text" placeholder="${settings.inputFieldMessage}" autocomplete="off" />
-      <button id="sendBtn" disabled>${settings.sendButton}</button>
+      <button id="sendBtn" disabled>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
     </div>
     <div class="powered-by">Powered by Lexoft</div>
   `;
 
+  settings.chatBubbleTheme = 'theme-1'
+  // settings.chatBubbleMessage = 'Need help? Chat with us!'
+  settings.chatBubbleMessage = '💬'
+
   const chatBubble = document.createElement('div');
   chatBubble.id = 'chatBubble';
-  chatBubble.textContent = '💬';
+  chatBubble.className = settings.chatBubbleTheme || 'theme-1';
+
+  if (chatBubble.className === 'theme-1') {
+    chatBubble.innerHTML = `
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    `;
+  } else {
+    chatBubble.textContent = settings.chatBubbleMessage;
+  }
 
   document.body.appendChild(chatBubble);
   document.body.appendChild(chatContainer);
+
+  // Add jump animation after delay if not clicked
+  let hasBeenClicked = false;
+  
+  // Get timing from CSS variables
+  const jumpDelay = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--jump-delay')) * 1000;
+  const jumpDuration = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--jump-duration')) * 1000;
+  
+  const jumpTimer = setTimeout(() => {
+    if (!hasBeenClicked) {
+      chatBubble.classList.add('jump-animation');
+      
+      // Remove jump-animation class after duration
+      setTimeout(() => {
+        chatBubble.classList.remove('jump-animation');
+      }, jumpDuration);
+    }
+  }, jumpDelay);
+
+  // Track if chat bubble has been clicked
+  chatBubble.addEventListener('click', () => {
+    hasBeenClicked = true;
+    clearTimeout(jumpTimer);
+  });
 
   // Add close button functionality for mobile
   if (isMobile) {
@@ -226,7 +258,7 @@ function processMessageQueue() {
 
   const bubble = document.createElement('div');
   bubble.className = 'bubble';
-  
+
   if (message.sender === 'bot') {
     // Add typewriter effect for bot messages
     typewriterEffect(bubble, message.text, () => {
@@ -250,7 +282,7 @@ function processMessageQueue() {
 
         wrapper.appendChild(qrContainer);
       }
-      
+
       // Mark typing as complete and process next message
       isTyping = false;
       processMessageQueue();
@@ -261,7 +293,7 @@ function processMessageQueue() {
     isTyping = false;
     processMessageQueue();
   }
-  
+
   wrapper.appendChild(bubble);
   message.chatElement.appendChild(wrapper);
   message.chatElement.scrollTop = message.chatElement.scrollHeight;
@@ -270,18 +302,18 @@ function processMessageQueue() {
 function typewriterEffect(element: HTMLElement, text: string, onComplete?: () => void) {
   let index = 0;
   const speed = 20; // milliseconds per character
-  
+
   function typeNextChar() {
     if (index < text.length) {
       element.textContent += text[index];
       index++;
-      
+
       // Auto-scroll to bottom as text is being typed
       const chatElement = element.closest('#chat');
       if (chatElement) {
         chatElement.scrollTop = chatElement.scrollHeight;
       }
-      
+
       setTimeout(typeNextChar, speed);
     } else {
       if (onComplete) {
@@ -289,7 +321,7 @@ function typewriterEffect(element: HTMLElement, text: string, onComplete?: () =>
       }
     }
   }
-  
+
   // Start typing
   typeNextChar();
 }
@@ -362,7 +394,7 @@ export async function initWebchat(endpointURL: string) {
   ui.chatBubble.addEventListener('click', () => {
     ui.chatContainer.classList.toggle('webchat-visible');
     const isOpen = ui.chatContainer.classList.contains('webchat-visible');
-    
+
     if (isOpen) {
       ui.chatBubble.classList.add('stop-animation');
       ui.input.focus();
