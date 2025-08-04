@@ -496,6 +496,83 @@ body {
   cursor: not-allowed;
 }
 
+/* ========================================
+   ACTION AREA
+   ======================================== */
+
+#actionArea {
+  position: absolute;
+  bottom: 80px;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  margin: var(--spacing-md);
+  box-shadow: 0 0 20px 0px #00000054;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  min-height: 50px;
+  gap: var(--spacing-md);
+  overflow: hidden;
+}
+
+#actionArea.action-hidden {
+  display: none;
+}
+
+#plusBtn {
+  transition: transform var(--transition-normal);
+}
+
+#plusBtn.rotated {
+  transform: rotate(45deg);
+}
+
+#actionArea .action-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  padding: var(--spacing-sm);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 33.333%;
+  height: 100%;
+  flex: 1;
+  gap: var(--spacing-xs);
+  min-height: 60px;
+}
+
+#actionArea .action-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+  transform: scale(1.1);
+}
+
+#actionArea .action-btn:active {
+  transform: scale(0.95);
+}
+
+#actionArea .action-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+#actionArea .action-label {
+  font-size: 10px;
+  font-weight: 500;
+  text-align: center;
+  line-height: 1;
+  color: var(--text-primary);
+  opacity: 0.8;
+}
+
 /* Hide branding for modern theme */
 #webchatWrapper.theme-container-modern .powered-by {
   display: none;

@@ -2,7 +2,7 @@
 import { io, Socket } from 'socket.io-client';
 import cssText from './style.css';
 
-// SVG constants
+// SVG constants (moved to top of file)
 const airplaneSVG = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -21,6 +21,27 @@ const downArrowSVG = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none
   <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
 
+const photosSVG = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
+  <circle cx="8.5" cy="8.5" r="1.5" stroke="currentColor" stroke-width="2"/>
+  <path d="M21 15L16 10L5 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+
+const documentsSVG = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M14 2V8H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M16 13H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M16 17H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M10 9H8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+
+const cameraSVG = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M23 19C23 19.5304 22.7893 20.0391 22.4142 20.4142C22.0391 20.7893 21.5304 21 21 21H3C2.46957 21 1.96086 20.7893 1.58579 20.4142C1.21071 20.0391 1 19.5304 1 19V8C1 7.46957 1.21071 6.96086 1.58579 6.58579C1.96086 6.21071 2.46957 6 3 6H7L9 3H15L17 6H21C21.5304 6 22.0391 6.21071 22.4142 6.58579C22.7893 6.96086 23 7.46957 23 8V19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="12" cy="13" r="4" stroke="currentColor" stroke-width="2"/>
+  <path d="M12 11V13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M10 13H14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+
 function injectCSS(css: string) {
   const style = document.createElement('style');
   style.textContent = css;
@@ -29,13 +50,14 @@ function injectCSS(css: string) {
 
 injectCSS(cssText);
 
-type ChatUI = {
+interface ChatUI {
+  chatBubble: HTMLDivElement;
   chatContainer: HTMLDivElement;
   chat: HTMLElement;
   input: HTMLInputElement;
   sendBtn: HTMLButtonElement;
-  chatBubble: HTMLDivElement;
-};
+  plusBtn: HTMLButtonElement;
+}
 
 interface EndpointSettings {
   flow: string;
@@ -132,6 +154,20 @@ function createChatUI(settings: EndpointSettings): ChatUI {
         ${airplaneSVG}
       </button>
     </div>
+    <div id="actionArea" class="action-area action-hidden">
+      <button class="action-btn" id="photosBtn" title="Photos">
+        ${photosSVG}
+        <span class="action-label">Photos</span>
+      </button>
+      <button class="action-btn" id="documentsBtn" title="Documents">
+        ${documentsSVG}
+        <span class="action-label">Documents</span>
+      </button>
+      <button class="action-btn" id="cameraBtn" title="Camera">
+        ${cameraSVG}
+        <span class="action-label">Camera</span>
+      </button>
+    </div>
     <div class="powered-by">Powered by Lexoft</div>
   `;
 
@@ -213,6 +249,7 @@ function createChatUI(settings: EndpointSettings): ChatUI {
     chat: chatContainer.querySelector<HTMLElement>('#chat')!,
     input: chatContainer.querySelector<HTMLInputElement>('#input')!,
     sendBtn: chatContainer.querySelector<HTMLButtonElement>('#sendBtn')!,
+    plusBtn: chatContainer.querySelector<HTMLButtonElement>('#plusBtn')!,
     chatBubble
   };
 }
@@ -425,6 +462,23 @@ function setupDevTestMode(ui: ChatUI) {
       ui.chatBubble.classList.remove('chat-open');
     }
   });
+
+  // Plus button functionality for dev test mode
+  ui.plusBtn.addEventListener('click', () => {
+    const actionArea = document.getElementById('actionArea');
+    if (actionArea) {
+      // Toggle the action-hidden class
+      actionArea.classList.toggle('action-hidden');
+      
+      // Toggle the rotated class based on whether action area is now visible
+      const isHidden = actionArea.classList.contains('action-hidden');
+      if (isHidden) {
+        ui.plusBtn.classList.remove('rotated');
+      } else {
+        ui.plusBtn.classList.add('rotated');
+      }
+    }
+  });
 }
 
 function handleDevTestMessage(ui: ChatUI) {
@@ -491,7 +545,7 @@ export async function initWebchat(endpointURL: string) {
       sendButton: "Send",
       chatBubbleTheme: 'theme-chatbubble-modern',
       chatContainerTheme: 'theme-container-modern',
-      enableJumpAnimation: true
+      enableJumpAnimation: false
     };
     
     const ui = createChatUI(devSettings);
@@ -545,20 +599,38 @@ export async function initWebchat(endpointURL: string) {
     return socket;
   };
 
+  // Add event listeners
   ui.chatBubble.addEventListener('click', () => {
     ui.chatContainer.classList.toggle('webchat-visible');
     const isOpen = ui.chatContainer.classList.contains('webchat-visible');
 
     if (isOpen) {
-      ui.chatBubble.classList.add('chat-open');
+      ui.chatBubble.classList.add('chat-open'); // Changed from stop-animation
       ui.input.focus();
       getOrCreateSocket();
     } else {
-      ui.chatBubble.classList.remove('chat-open');
+      ui.chatBubble.classList.remove('chat-open'); // Changed from stop-animation
     }
     
-    // Update the chat bubble icon
+    // Update the chat bubble icon (this call now primarily toggles the 'chat-open' class)
     updateChatBubbleIcon(ui.chatBubble, endpointSettings);
+  });
+
+  // Plus button functionality
+  ui.plusBtn.addEventListener('click', () => {
+    const actionArea = document.getElementById('actionArea');
+    if (actionArea) {
+      // Toggle the action-hidden class
+      actionArea.classList.toggle('action-hidden');
+      
+      // Toggle the rotated class based on whether action area is now visible
+      const isHidden = actionArea.classList.contains('action-hidden');
+      if (isHidden) {
+        ui.plusBtn.classList.remove('rotated');
+      } else {
+        ui.plusBtn.classList.add('rotated');
+      }
+    }
   });
 }
 
