@@ -2,6 +2,25 @@
 import { io, Socket } from 'socket.io-client';
 import cssText from './style.css';
 
+// SVG constants
+const airplaneSVG = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+
+const chatBubbleSVG = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+
+const plusSVG = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M12 5V19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+
+const downArrowSVG = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+
 function injectCSS(css: string) {
   const style = document.createElement('style');
   style.textContent = css;
@@ -91,21 +110,6 @@ function createChatUI(settings: EndpointSettings): ChatUI {
   root.style.setProperty('--user-message-default-bg', settings.colors.message.user);
   root.style.setProperty('--chat-bubble-default-bg', settings.colors.chatBubble || settings.colors.header);
 
-  // SVG constants
-  const airplaneSVG = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>`;
-
-  const chatBubbleSVG = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>`;
-
-  const plusSVG = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M12 5V19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>`;
-
   const chatContainer = document.createElement('div');
   chatContainer.id = 'chatContainer';
 
@@ -135,23 +139,31 @@ function createChatUI(settings: EndpointSettings): ChatUI {
 
   const chatBubble = document.createElement('div');
   chatBubble.id = 'chatBubble';
-  chatBubble.innerHTML = chatBubbleSVG;
+  chatBubble.innerHTML = `
+    <div class="chat-bubble-icon">${chatBubbleSVG}</div>
+    <div class="down-arrow-icon">${downArrowSVG}</div>
+  `;
 
   // If using pill theme, add text content
   if (settings.chatBubbleTheme === 'theme-chatbubble-pill') {
     const pillText = settings.chatBubblePillMessage || "Default message";
-    chatBubble.innerHTML = `${chatBubble.innerHTML} ${pillText}`;
+    const smallChatBubbleSVG = chatBubbleSVG.replace('width="20" height="20"', 'width="16" height="16"');
+    chatBubble.innerHTML = `
+      <div class="chat-bubble-icon">${smallChatBubbleSVG}</div>
+      <div class="down-arrow-icon">${downArrowSVG.replace('width="20" height="20"', 'width="16" height="16"')}</div>
+      <span class="pill-text">${pillText}</span>
+    `;
   }
 
   // Create wrapper container for both chat bubble and chat container
   const webchatWrapper = document.createElement('div');
   webchatWrapper.id = 'webchatWrapper';
-
+  
   // Apply themes - default to circle bubble and small container
   const bubbleTheme = settings.chatBubbleTheme || 'theme-chatbubble-circle';
   const containerTheme = settings.chatContainerTheme || 'theme-container-small';
   webchatWrapper.className = `${bubbleTheme} ${containerTheme}`;
-
+  
   // Add both elements to the wrapper
   webchatWrapper.appendChild(chatBubble);
   webchatWrapper.appendChild(chatContainer);
@@ -203,6 +215,29 @@ function createChatUI(settings: EndpointSettings): ChatUI {
     sendBtn: chatContainer.querySelector<HTMLButtonElement>('#sendBtn')!,
     chatBubble
   };
+}
+
+function updateChatBubbleIcon(chatBubble: HTMLDivElement, settings: EndpointSettings) {
+  // The icons are now always present in the DOM, visibility is controlled by CSS
+  // No need to update innerHTML, just ensure the structure is correct
+  const isOpen = chatBubble.classList.contains('chat-open');
+  
+  if (settings.chatBubbleTheme === 'theme-chatbubble-pill') {
+    const pillText = settings.chatBubblePillMessage || "Default message";
+    const smallChatBubbleSVG = chatBubbleSVG.replace('width="20" height="20"', 'width="16" height="16"');
+    const smallDownArrowSVG = downArrowSVG.replace('width="20" height="20"', 'width="16" height="16"');
+    
+    chatBubble.innerHTML = `
+      <div class="chat-bubble-icon">${smallChatBubbleSVG}</div>
+      <div class="down-arrow-icon">${smallDownArrowSVG}</div>
+      <span class="pill-text">${pillText}</span>
+    `;
+  } else {
+    chatBubble.innerHTML = `
+      <div class="chat-bubble-icon">${chatBubbleSVG}</div>
+      <div class="down-arrow-icon">${downArrowSVG}</div>
+    `;
+  }
 }
 
 function setupSocketConnection(basePath: string, endpointID: string, ui: ChatUI): Socket {
@@ -384,10 +419,10 @@ function setupDevTestMode(ui: ChatUI) {
     const isOpen = ui.chatContainer.classList.contains('webchat-visible');
 
     if (isOpen) {
-      ui.chatBubble.classList.add('stop-animation');
+      ui.chatBubble.classList.add('chat-open');
       ui.input.focus();
     } else {
-      ui.chatBubble.classList.remove('stop-animation');
+      ui.chatBubble.classList.remove('chat-open');
     }
   });
 }
@@ -456,7 +491,7 @@ export async function initWebchat(endpointURL: string) {
       sendButton: "Send",
       chatBubbleTheme: 'theme-chatbubble-modern',
       chatContainerTheme: 'theme-container-modern',
-      enableJumpAnimation: false
+      enableJumpAnimation: true
     };
     
     const ui = createChatUI(devSettings);
@@ -515,12 +550,15 @@ export async function initWebchat(endpointURL: string) {
     const isOpen = ui.chatContainer.classList.contains('webchat-visible');
 
     if (isOpen) {
-      ui.chatBubble.classList.add('stop-animation');
+      ui.chatBubble.classList.add('chat-open');
       ui.input.focus();
       getOrCreateSocket();
     } else {
-      ui.chatBubble.classList.remove('stop-animation');
+      ui.chatBubble.classList.remove('chat-open');
     }
+    
+    // Update the chat bubble icon
+    updateChatBubbleIcon(ui.chatBubble, endpointSettings);
   });
 }
 

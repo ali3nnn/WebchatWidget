@@ -170,7 +170,7 @@ body {
 }
 
 #webchatWrapper.theme-chatbubble-circle #chatBubble:hover {
-  transform: translateY(-5px);
+  /* transform: translateY(-5px); */
   box-shadow: 
     0 15px 35px var(--shadow-primary-hover),
     0 8px 15px var(--shadow-medium);
@@ -211,14 +211,15 @@ body {
 }
 
 #webchatWrapper.theme-chatbubble-modern #chatBubble:hover {
-  transform: translateY(-5px);
+  /* transform: translateY(-5px); */
   box-shadow: 
     0 15px 35px var(--shadow-primary-hover),
     0 8px 15px var(--shadow-medium);
 }
 
 #webchatWrapper.theme-chatbubble-modern #chatBubble:active {
-  transform: translateY(-2px);
+  /* transform: translateY(-2px); */
+  transform: scale(0.9);
 }
 
 /* Chat Bubble Theme - Pill */
@@ -254,7 +255,7 @@ body {
 }
 
 #webchatWrapper.theme-chatbubble-pill #chatBubble:hover {
-  transform: translateY(-3px);
+  /* transform: translateY(-3px); */
   box-shadow: 
     0 12px 25px var(--shadow-primary-hover),
     0 6px 15px var(--shadow-medium);
@@ -398,7 +399,7 @@ body {
   bottom: 0;
   left: 0;
   right: 0;
-  padding: var(--spacing-lg) var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-sm);
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(10px);
   border-radius: 20px;
@@ -829,6 +830,53 @@ body {
 
 #chatContainer.webchat-visible {
   display: flex;
+}
+
+/* ========================================
+   CHAT BUBBLE ICONS
+   ======================================== */
+#chatBubble .chat-bubble-icon,
+#chatBubble .down-arrow-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transition: all var(--transition-normal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+#chatBubble .down-arrow-icon {
+  display: none;
+}
+
+#chatBubble.chat-open .chat-bubble-icon {
+  display: none;
+}
+
+#chatBubble.chat-open .down-arrow-icon {
+  display: flex;
+}
+
+/* Pill theme specific styling */
+#chatBubble .pill-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin-left: 20px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+#chatBubble.chat-open .pill-text {
+  display: none;
 }
 
 /* ========================================
