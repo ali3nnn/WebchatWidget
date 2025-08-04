@@ -386,6 +386,7 @@ body {
   border-radius: 0 0 var(--radius-xl) var(--radius-xl);
   border-top: 1px solid rgba(255, 255, 255, 0.3);
   z-index: 10;
+  gap: 0;
 }
 
 #webchatWrapper.theme-container-modern #chatContainer #input {
@@ -400,6 +401,10 @@ body {
   color: var(--dark-gray);
 }
 
+#webchatWrapper.theme-container-modern #chatContainer #input::placeholder {
+  color: var(--dark-gray);
+}
+
 #webchatWrapper.theme-container-modern #chatContainer #input:focus {
   background: transparent;
   border: none;
@@ -411,7 +416,8 @@ body {
 #webchatWrapper.theme-container-modern #chatContainer #sendBtn {
   background: transparent;
   border: none;
-  border-radius: 20px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 0;
   padding: var(--spacing-md) var(--spacing-lg);
   color: var(--dark-gray);
   font-weight: 500;
@@ -428,6 +434,7 @@ body {
 #webchatWrapper.theme-container-modern #chatContainer #sendBtn:hover {
   background: transparent;
   color: var(--primary-color);
+  border-bottom: 1px solid var(--primary-color);
   transform: none;
   box-shadow: none;
 }
