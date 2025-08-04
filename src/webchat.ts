@@ -42,6 +42,20 @@ const cameraSVG = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" x
   <path d="M10 13H14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
 
+const audioFileSVG = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M14 2V8H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M8 13H10L12 11V17L10 15H8V13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M16 11V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+
+const voiceRecordingSVG = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M12 1A3 3 0 0 0 9 4V10A3 3 0 0 0 15 10V4A3 3 0 0 0 12 1Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M19 10V14A7 7 0 0 1 5 14V10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M12 19V23" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M8 23H16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+
 function injectCSS(css: string) {
   const style = document.createElement('style');
   style.textContent = css;
@@ -155,17 +169,25 @@ function createChatUI(settings: EndpointSettings): ChatUI {
       </button>
     </div>
     <div id="actionArea" class="action-area action-hidden">
+    <button class="action-btn" id="documentsBtn" title="Documents">
+        ${documentsSVG}
+        <span class="action-label">Documents</span>
+      </button>
       <button class="action-btn" id="photosBtn" title="Photos">
         ${photosSVG}
         <span class="action-label">Photos</span>
       </button>
-      <button class="action-btn" id="documentsBtn" title="Documents">
-        ${documentsSVG}
-        <span class="action-label">Documents</span>
-      </button>
       <button class="action-btn" id="cameraBtn" title="Camera">
         ${cameraSVG}
         <span class="action-label">Camera</span>
+      </button>
+      <button class="action-btn" id="audioFileBtn" title="Audio File">
+        ${audioFileSVG}
+        <span class="action-label">Audio</span>
+      </button>
+      <button class="action-btn" id="voiceRecordingBtn" title="Voice Recording">
+        ${voiceRecordingSVG}
+        <span class="action-label">Voice</span>
       </button>
     </div>
     <div class="powered-by">Powered by Lexoft</div>
