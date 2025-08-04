@@ -112,7 +112,7 @@ function createChatUI(settings: EndpointSettings): ChatUI {
       <span>${settings.chatbotName}</span>
       ${isMobile ? '<button class="close-btn">×</button>' : ''}
     </div>
-    <div id="chat" class="chat-box">
+    <div id="chat" class="chat-box" data-chatbot-name="${settings.chatbotName}">
     </div>
     <div id="inputArea" class="input-area">
       <input id="input" type="text" placeholder="${settings.inputFieldMessage}" autocomplete="off" />

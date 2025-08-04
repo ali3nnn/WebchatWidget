@@ -355,7 +355,7 @@ body {
   backdrop-filter: blur(20px);
   border: none;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
   z-index: var(--z-chat-container);
   animation: slideIn var(--transition-normal);
   position: relative;
@@ -363,12 +363,28 @@ body {
 }
 
 #webchatWrapper.theme-container-modern #chatContainer #header {
-  display: none;
+  position: absolute;
+  top: -70px;
+  left: 0;
+  right: 0;
+  padding: var(--spacing-lg) var(--spacing-xl);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border-radius: var(--radius-xl);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--dark-gray);
 }
 
 #webchatWrapper.theme-container-modern #chatContainer #chat {
   padding: var(--spacing-md);
-  padding-bottom: 70px;
+  padding-bottom: 100px;
+  /* padding-top: 80px; */
   background: transparent;
   flex: 1;
   height: 100%;
@@ -383,7 +399,9 @@ body {
   padding: var(--spacing-lg) var(--spacing-xl);
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(10px);
-  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+  border-radius: 30px;
+  margin: 20px 30px;
+  box-shadow: 0 0 20px 0px #00000054;
   border-top: 1px solid rgba(255, 255, 255, 0.3);
   z-index: 10;
   gap: 0;
