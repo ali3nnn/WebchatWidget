@@ -346,8 +346,8 @@ body {
 
 /* Chat Container Theme - Modern */
 #webchatWrapper.theme-container-modern #chatContainer {
-  width: 380px;
-  height: 520px;
+  width: 480px;
+  height: 620px;
   background: rgba(255, 255, 255, 0.95);
   border-radius: var(--radius-xl);
   box-shadow: 
@@ -516,7 +516,7 @@ body {
   align-items: center;
   justify-content: space-around;
   min-height: 50px;
-  gap: var(--spacing-md);
+  /* gap: var(--spacing-md); */
   overflow: hidden;
 }
 
@@ -530,6 +530,10 @@ body {
 
 #plusBtn.rotated {
   transform: rotate(45deg);
+}
+
+#actionArea .action-btn svg {
+  transition: all var(--transition-normal);
 }
 
 #actionArea .action-btn {
@@ -552,7 +556,10 @@ body {
 
 #actionArea .action-btn:hover {
   background: rgba(0, 0, 0, 0.1);
-  transform: scale(1.1);
+}
+
+#actionArea .action-btn:hover svg {
+  transform: scale(1.2);
 }
 
 #actionArea .action-btn:active {

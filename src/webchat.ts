@@ -545,6 +545,7 @@ export async function initWebchat(endpointURL: string) {
       sendButton: "Send",
       chatBubbleTheme: 'theme-chatbubble-modern',
       chatContainerTheme: 'theme-container-modern',
+      // chatContainerTheme: 'theme-container-big',
       enableJumpAnimation: false
     };
     
