@@ -31,7 +31,10 @@ interface EndpointSettings {
   inputFieldMessage: string;
   sendButton: string;
   chatBubbleMessage?: string;
+  chatBubblePillMessage?: string;
   chatBubbleTheme?: string;
+  chatContainerTheme?: string;
+  enableJumpAnimation?: boolean;
 }
 
 function log(...args: unknown[]) {
@@ -88,12 +91,22 @@ function createChatUI(settings: EndpointSettings): ChatUI {
   root.style.setProperty('--user-message-default-bg', settings.colors.message.user);
   root.style.setProperty('--chat-bubble-default-bg', settings.colors.chatBubble || settings.colors.header);
 
+  // SVG constants
+  const airplaneSVG = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;
+
+  const chatBubbleSVG = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;
+
   const chatContainer = document.createElement('div');
   chatContainer.id = 'chatContainer';
-  
+
   // Check if we're on mobile (width < 600px)
   const isMobile = window.innerWidth < 600;
-  
+
   chatContainer.innerHTML = `
     <div id="header">
       <span>${settings.chatbotName}</span>
@@ -104,35 +117,38 @@ function createChatUI(settings: EndpointSettings): ChatUI {
     <div id="inputArea" class="input-area">
       <input id="input" type="text" placeholder="${settings.inputFieldMessage}" autocomplete="off" />
       <button id="sendBtn" disabled>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+        ${airplaneSVG}
       </button>
     </div>
     <div class="powered-by">Powered by Lexoft</div>
   `;
 
-  settings.chatBubbleTheme = 'theme-1'
   // settings.chatBubbleMessage = 'Need help? Chat with us!'
-  settings.chatBubbleMessage = '💬'
 
   const chatBubble = document.createElement('div');
   chatBubble.id = 'chatBubble';
-  chatBubble.className = settings.chatBubbleTheme || 'theme-1';
+  chatBubble.innerHTML = chatBubbleSVG;
 
-  if (chatBubble.className === 'theme-1') {
-    chatBubble.innerHTML = `
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    `;
-  } else {
-    chatBubble.textContent = settings.chatBubbleMessage;
+  // If using pill theme, add text content
+  if (settings.chatBubbleTheme === 'theme-chatbubble-pill') {
+    const pillText = settings.chatBubblePillMessage || "Default message";
+    chatBubble.innerHTML = `${chatBubble.innerHTML} ${pillText}`;
   }
 
-  document.body.appendChild(chatBubble);
-  document.body.appendChild(chatContainer);
+  // Create wrapper container for both chat bubble and chat container
+  const webchatWrapper = document.createElement('div');
+  webchatWrapper.id = 'webchatWrapper';
+
+  // Apply themes - default to circle bubble and small container
+  const bubbleTheme = settings.chatBubbleTheme || 'theme-chatbubble-circle';
+  const containerTheme = settings.chatContainerTheme || 'theme-container-small';
+  webchatWrapper.className = `${bubbleTheme} ${containerTheme}`;
+
+  // Add both elements to the wrapper
+  webchatWrapper.appendChild(chatBubble);
+  webchatWrapper.appendChild(chatContainer);
+
+  document.body.appendChild(webchatWrapper);
 
   // Add jump animation after delay if not clicked
   let hasBeenClicked = false;
@@ -141,22 +157,25 @@ function createChatUI(settings: EndpointSettings): ChatUI {
   const jumpDelay = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--jump-delay')) * 1000;
   const jumpDuration = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--jump-duration')) * 1000;
   
-  const jumpTimer = setTimeout(() => {
-    if (!hasBeenClicked) {
-      chatBubble.classList.add('jump-animation');
-      
-      // Remove jump-animation class after duration
-      setTimeout(() => {
-        chatBubble.classList.remove('jump-animation');
-      }, jumpDuration);
-    }
-  }, jumpDelay);
+  // Only add jump animation if enabled in settings
+  if (settings.enableJumpAnimation !== false) { // Default to true if not specified
+    const jumpTimer = setTimeout(() => {
+      if (!hasBeenClicked) {
+        chatBubble.classList.add('jump-animation');
+        
+        // Remove jump-animation class after duration
+        setTimeout(() => {
+          chatBubble.classList.remove('jump-animation');
+        }, jumpDuration);
+      }
+    }, jumpDelay);
 
-  // Track if chat bubble has been clicked
-  chatBubble.addEventListener('click', () => {
-    hasBeenClicked = true;
-    clearTimeout(jumpTimer);
-  });
+    // Track if chat bubble has been clicked
+    chatBubble.addEventListener('click', () => {
+      hasBeenClicked = true;
+      clearTimeout(jumpTimer);
+    });
+  }
 
   // Add close button functionality for mobile
   if (isMobile) {
@@ -373,7 +392,17 @@ export async function initWebchat(endpointURL: string) {
       throw new Error(`GET request failed with status ${response.status}`);
     }
     const data = await response.json();
-    endpointSettings = data.settings;
+    endpointSettings = {
+      ...data.settings,
+      enableJumpAnimation: false,
+      // chatBubbleTheme: 'theme-chatbubble-circle',
+      // chatBubbleTheme: 'theme-chatbubble-pill',
+      chatBubbleTheme: 'theme-chatbubble-modern',
+      // chatContainerTheme: 'theme-container-big',
+      // chatContainerTheme: 'theme-container-small',
+      chatContainerTheme: 'theme-container-modern',
+      chatBubblePillMessage: 'Need help? Chat with us!'
+    };
   } catch (error) {
     console.error('❌ Error making GET request:', error);
     return;
