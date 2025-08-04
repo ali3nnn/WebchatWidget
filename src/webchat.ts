@@ -116,7 +116,7 @@ function createChatUI(settings: EndpointSettings): ChatUI {
     </div>
     <div id="inputArea" class="input-area">
       <input id="input" type="text" placeholder="${settings.inputFieldMessage}" autocomplete="off" />
-      <button id="sendBtn" disabled>
+      <button id="sendBtn">
         ${airplaneSVG}
       </button>
     </div>
