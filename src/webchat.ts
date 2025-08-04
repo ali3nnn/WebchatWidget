@@ -359,6 +359,62 @@ function attachEventListeners(ui: ChatUI, socket: Socket) {
 
 }
 
+function setupDevTestMode(ui: ChatUI) {
+  // Simulate initial bot message
+  setTimeout(() => {
+    addMessage(ui.chat, "Hello! I'm a dev test bot. How can I help you today?", 'bot', ['Tell me more', 'What can you do?', 'Goodbye']);
+  }, 1000);
+
+  // Add event listeners for dev test mode
+  ui.sendBtn.addEventListener('click', () => handleDevTestMessage(ui));
+  ui.input.addEventListener('keydown', (e: KeyboardEvent) => {
+    if (e.key === 'Enter') handleDevTestMessage(ui);
+  });
+
+  ui.chatBubble.addEventListener('click', () => {
+    ui.chatContainer.classList.toggle('webchat-visible');
+    const isOpen = ui.chatContainer.classList.contains('webchat-visible');
+
+    if (isOpen) {
+      ui.chatBubble.classList.add('stop-animation');
+      ui.input.focus();
+    } else {
+      ui.chatBubble.classList.remove('stop-animation');
+    }
+  });
+}
+
+function handleDevTestMessage(ui: ChatUI) {
+  const text = ui.input.value.trim();
+  if (!text) return;
+  
+  // Add user message
+  addMessage(ui.chat, text, 'user');
+  ui.input.value = '';
+  ui.input.focus();
+
+  // Simulate bot response
+  setTimeout(() => {
+    const responses = [
+      "That's interesting! Tell me more about that.",
+      "I understand. How does that make you feel?",
+      "Thanks for sharing that with me.",
+      "I'm here to help. What else would you like to discuss?",
+      "That's a great point. Can you elaborate?",
+      "I'm listening. Please continue.",
+      "Thank you for your message. How can I assist you further?",
+      "I appreciate you taking the time to share that.",
+      "That's helpful information. What's next?",
+      "I'm here to support you. What would you like to explore?"
+    ];
+    
+    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+    const quickReplies = ['Tell me more', 'What else?', 'Thanks', 'Goodbye'];
+    
+    addMessage(ui.chat, randomResponse, 'bot', quickReplies);
+  },  Math.random() * 1000); // Random delay between 1-3 seconds
+}
+
 function sendMessage(ui: ChatUI, socket: Socket) {
   const text = ui.input.value.trim();
   if (!text) return;
@@ -371,6 +427,32 @@ function sendMessage(ui: ChatUI, socket: Socket) {
 export async function initWebchat(endpointURL: string) {
   if (!endpointURL) {
     console.error('⚠️ You must provide the full WebSocket URL to initWebchat()');
+    return;
+  }
+
+  // Check if we're in dev test mode
+  const isDevTestMode = endpointURL === 'DEV_TEST_MODE';
+  
+  if (isDevTestMode) {
+    log('🧪 Initializing Webchat in DEV_TEST_MODE');
+    const devSettings = {
+      flow: "dev-test",
+      chatbotName: "Dev Test Bot",
+      colors: {
+        header: "#667eea",
+        message: {
+          user: "#667eea"
+        }
+      },
+      inputFieldMessage: "Type your message...",
+      sendButton: "Send",
+      chatBubbleTheme: 'theme-chatbubble-modern',
+      chatContainerTheme: 'theme-container-modern',
+      enableJumpAnimation: false
+    };
+    
+    const ui = createChatUI(devSettings);
+    setupDevTestMode(ui);
     return;
   }
 
