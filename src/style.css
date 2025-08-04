@@ -355,7 +355,7 @@ body {
   backdrop-filter: blur(20px);
   border: none;
   flex-direction: column;
-  overflow: visible;
+  overflow: hidden;
   z-index: var(--z-chat-container);
   animation: slideIn var(--transition-normal);
   position: relative;
@@ -363,6 +363,7 @@ body {
 }
 
 #webchatWrapper.theme-container-modern #chatContainer #header {
+  display: none;
   position: absolute;
   top: -70px;
   left: 0;
@@ -384,7 +385,8 @@ body {
 #webchatWrapper.theme-container-modern #chatContainer #chat {
   padding: var(--spacing-md);
   padding-bottom: 100px;
-  /* padding-top: 80px; */
+  /* padding-top: 80px;gst
+   */
   background: transparent;
   flex: 1;
   height: 100%;
@@ -399,8 +401,10 @@ body {
   padding: var(--spacing-lg) var(--spacing-xl);
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(10px);
-  border-radius: 30px;
-  margin: 20px 30px;
+  border-radius: 20px;
+  margin: 20px 20px;
+  /* margin: 0 auto; */
+  /* width: 90%; */
   box-shadow: 0 0 20px 0px #00000054;
   border-top: 1px solid rgba(255, 255, 255, 0.3);
   z-index: 10;
@@ -410,7 +414,7 @@ body {
 #webchatWrapper.theme-container-modern #chatContainer #input {
   background: transparent;
   border: none;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  /* border-bottom: 1px solid rgba(0, 0, 0, 0.2); */
   border-radius: 0;
   padding: var(--spacing-md) var(--spacing-lg);
   font-size: 14px;
@@ -434,7 +438,7 @@ body {
 #webchatWrapper.theme-container-modern #chatContainer #sendBtn {
   background: transparent;
   border: none;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  /* border-bottom: 1px solid rgba(0, 0, 0, 0.2); */
   border-radius: 0;
   padding: var(--spacing-md) var(--spacing-lg);
   color: var(--dark-gray);
