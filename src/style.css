@@ -133,7 +133,9 @@ body {
   gap: var(--spacing-lg);
 }
 
-
+#webchatWrapper #chatContainer {
+ display: none;
+}
 
 /* ========================================
    CHAT BUBBLE THEMES
@@ -375,10 +377,21 @@ body {
   z-index: 15;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   font-size: 16px;
   font-weight: 600;
   backdrop-filter: blur(10px);
+}
+
+#webchatWrapper.theme-container-modern #chatContainer #header .header-spacer {
+  width: 40px;
+  flex-shrink: 0;
+}
+
+#webchatWrapper.theme-container-modern #chatContainer #header .header-title {
+  flex: 1;
+  text-align: center;
+  font-weight: 600;
 }
 
 #webchatWrapper.theme-container-modern #chatContainer #chat {
@@ -623,6 +636,35 @@ body {
   display: inline-block;
   position: relative;
   z-index: 1;
+}
+
+/* ========================================
+   CLOSE BUTTON
+   ======================================== */
+
+.close-btn {
+  position: absolute;
+  right: var(--spacing-lg);
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: var(--spacing-sm);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-normal);
+  flex-shrink: 0;
+  color: var(--white);
+  z-index: 1;
+}
+
+.close-btn:hover {
+  transform: translateY(-50%) rotate(45deg) scale(0.95);
 }
 
 /* ========================================
@@ -903,13 +945,13 @@ body {
   flex-direction: column;
   overflow: hidden;
   z-index: var(--z-chat-container);
-  display: none;
+  display: flex;
   border: 1px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(10px);
   animation: slideIn var(--transition-normal);
 }
 
-#chatContainer.webchat-visible {
+#webchatWrapper.webchat-visible #chatContainer {
   display: flex;
 }
 
@@ -934,11 +976,11 @@ body {
   display: none;
 }
 
-#chatBubble.chat-open .chat-bubble-icon {
+#webchatWrapper.webchat-visible #chatBubble .chat-bubble-icon {
   display: none;
 }
 
-#chatBubble.chat-open .down-arrow-icon {
+#webchatWrapper.webchat-visible #chatBubble .down-arrow-icon {
   display: flex;
 }
 
@@ -1002,20 +1044,6 @@ body {
   #sendBtn {
     padding: var(--spacing-md) var(--spacing-lg);
     font-size: 14px;
-  }
-}
-
-/* Show close button on screens lower than 600px */
-@media (max-width: 599px) {
-  .close-btn {
-    display: flex;
-  }
-}
-
-/* Hide close button on screens bigger than 600px */
-@media (min-width: 600px) {
-  .close-btn {
-    display: none;
   }
 }
 

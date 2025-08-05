@@ -65,6 +65,7 @@ function injectCSS(css: string) {
 injectCSS(cssText);
 
 interface ChatUI {
+  webchatWrapper: HTMLDivElement;
   chatBubble: HTMLDivElement;
   chatContainer: HTMLDivElement;
   chat: HTMLElement;
@@ -152,12 +153,14 @@ function createChatUI(settings: EndpointSettings): ChatUI {
   // Check if we're on mobile (width < 600px)
   const isMobile = window.innerWidth < 600;
 
-  chatContainer.classList.add('webchat-visible'); // TODO: remove this
+  // chatContainer.classList.add('webchat-visible'); // TODO: remove this
   
   chatContainer.innerHTML = `
     <div id="header">
-      <span>${settings.chatbotName}</span>
-      ${isMobile ? '<button class="close-btn">×</button>' : ''}
+      <span class="header-title">${settings.chatbotName}</span>
+      <button class="close-btn">
+        ${plusSVG}
+      </button>
     </div>
     <div id="chat" class="chat-box" data-chatbot-name="${settings.chatbotName}">
     </div>
@@ -171,7 +174,7 @@ function createChatUI(settings: EndpointSettings): ChatUI {
       </button>
     </div>
     <div id="actionArea" class="action-area action-hidden">
-    <button class="action-btn" id="documentsBtn" title="Documents">
+      <button class="action-btn" id="documentsBtn" title="Documents">
         ${documentsSVG}
         <span class="action-label">Documents</span>
       </button>
@@ -262,13 +265,14 @@ function createChatUI(settings: EndpointSettings): ChatUI {
     const closeBtn = chatContainer.querySelector('.close-btn') as HTMLButtonElement;
     if (closeBtn) {
       closeBtn.addEventListener('click', () => {
-        chatContainer.classList.remove('webchat-visible');
+        webchatWrapper.classList.remove('webchat-visible');
         chatBubble.classList.remove('stop-animation');
       });
     }
   }
 
   return {
+    webchatWrapper,
     chatContainer,
     chat: chatContainer.querySelector<HTMLElement>('#chat')!,
     input: chatContainer.querySelector<HTMLInputElement>('#input')!,
@@ -476,8 +480,8 @@ function setupDevTestMode(ui: ChatUI) {
   });
 
   ui.chatBubble.addEventListener('click', () => {
-    ui.chatContainer.classList.toggle('webchat-visible');
-    const isOpen = ui.chatContainer.classList.contains('webchat-visible');
+    ui.webchatWrapper.classList.toggle('webchat-visible');
+    const isOpen = ui.webchatWrapper.classList.contains('webchat-visible');
 
     if (isOpen) {
       ui.chatBubble.classList.add('chat-open');
@@ -486,6 +490,15 @@ function setupDevTestMode(ui: ChatUI) {
       ui.chatBubble.classList.remove('chat-open');
     }
   });
+
+  // Close button functionality for dev test mode
+  const closeBtn = ui.chatContainer.querySelector('.close-btn');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      ui.webchatWrapper.classList.remove('webchat-visible');
+      ui.chatBubble.classList.remove('chat-open');
+    });
+  }
 
   // Plus button functionality for dev test mode
   ui.plusBtn.addEventListener('click', () => {
@@ -626,8 +639,8 @@ export async function initWebchat(endpointURL: string) {
 
   // Add event listeners
   ui.chatBubble.addEventListener('click', () => {
-    ui.chatContainer.classList.toggle('webchat-visible');
-    const isOpen = ui.chatContainer.classList.contains('webchat-visible');
+    ui.webchatWrapper.classList.toggle('webchat-visible');
+    const isOpen = ui.webchatWrapper.classList.contains('webchat-visible');
 
     if (isOpen) {
       ui.chatBubble.classList.add('chat-open'); // Changed from stop-animation
@@ -640,6 +653,16 @@ export async function initWebchat(endpointURL: string) {
     // Update the chat bubble icon (this call now primarily toggles the 'chat-open' class)
     updateChatBubbleIcon(ui.chatBubble, endpointSettings);
   });
+
+  // Close button functionality
+  const closeBtn = ui.chatContainer.querySelector('.close-btn');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      ui.webchatWrapper.classList.remove('webchat-visible');
+      ui.chatBubble.classList.remove('chat-open');
+      updateChatBubbleIcon(ui.chatBubble, endpointSettings);
+    });
+  }
 
   // Plus button functionality
   ui.plusBtn.addEventListener('click', () => {
