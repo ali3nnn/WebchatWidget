@@ -81,6 +81,7 @@ interface EndpointSettings {
     header: string;
     message: {
       user: string;
+      bot: string;
     };
     chatBubble?: string;
   };
@@ -134,11 +135,13 @@ function createChatUI(settings: EndpointSettings): ChatUI {
 
   const headerGradient = createGradient(settings.colors.header);
   const userMessageGradient = createGradient(settings.colors.message.user);
+  const botMessageGradient = createGradient(settings.colors.message.bot);
   const chatBubbleGradient = createGradient(settings.colors.chatBubble || settings.colors.header);
 
   // Update CSS root variables
   const root = document.documentElement;
   root.style.setProperty('--header-bg', headerGradient);
+  root.style.setProperty('--bot-message-bg', botMessageGradient);
   root.style.setProperty('--user-message-bg', userMessageGradient);
   root.style.setProperty('--chat-bubble-bg', chatBubbleGradient);
   
@@ -306,6 +309,7 @@ function updateChatBubbleIcon(chatBubble: HTMLDivElement, settings: EndpointSett
 }
 
 function setupSocketConnection(basePath: string, endpointID: string, ui: ChatUI): Socket {
+  console.log('endpointID', endpointID);
   const socket = io(basePath, {
     auth: { endpoint: endpointID },
     reconnectionAttempts: 3,
@@ -386,11 +390,14 @@ function processMessageQueue() {
   const bubble = document.createElement('div');
   bubble.className = 'bubble';
 
+  wrapper.appendChild(bubble);
+  
   if (message.sender === 'bot') {
     // Add typewriter effect for bot messages
     typewriterEffect(bubble, message.text, () => {
       // Add quick replies after typing is complete
       if (message.quickReplies.length > 0 && message.socket && message.ui) {
+        console.log('Adding quick replies:', message.quickReplies);
         const qrContainer = document.createElement('div');
         qrContainer.className = 'quick-replies';
 
@@ -408,6 +415,9 @@ function processMessageQueue() {
         });
 
         wrapper.appendChild(qrContainer);
+        console.log('Quick replies container added to wrapper');
+      } else {
+        console.log('No quick replies to add. Length:', message.quickReplies.length, 'Socket:', !!message.socket, 'UI:', !!message.ui);
       }
 
       // Mark typing as complete and process next message
@@ -421,7 +431,6 @@ function processMessageQueue() {
     processMessageQueue();
   }
 
-  wrapper.appendChild(bubble);
   message.chatElement.appendChild(wrapper);
   message.chatElement.scrollTop = message.chatElement.scrollHeight;
 }
@@ -430,9 +439,13 @@ function typewriterEffect(element: HTMLElement, text: string, onComplete?: () =>
   let index = 0;
   const speed = 20; // milliseconds per character
 
+  // Create a text node to hold the typed text
+  const textNode = document.createTextNode('');
+  element.appendChild(textNode);
+
   function typeNextChar() {
     if (index < text.length) {
-      element.textContent += text[index];
+      textNode.textContent += text[index];
       index++;
 
       // Auto-scroll to bottom as text is being typed
@@ -470,7 +483,8 @@ function attachEventListeners(ui: ChatUI, socket: Socket) {
 function setupDevTestMode(ui: ChatUI) {
   // Simulate initial bot message
   setTimeout(() => {
-    addMessage(ui.chat, "Hello! I'm a dev test bot. How can I help you today?", 'bot', ['Tell me more', 'What can you do?', 'Goodbye']);
+    // @ts-ignore
+    addMessage(ui.chat, "Hello! I'm a dev test bot. How can I help you today?", 'bot', ['Tell me more', 'What can you do?', 'Goodbye', 'This is a long quick reply', 'Test'], true, ui);
   }, 1000);
 
   // Add event listeners for dev test mode
@@ -523,7 +537,7 @@ function handleDevTestMessage(ui: ChatUI) {
   if (!text) return;
   
   // Add user message
-  addMessage(ui.chat, text, 'user');
+  addMessage(ui.chat, text, 'user', [], undefined, ui);
   ui.input.value = '';
   ui.input.focus();
 
@@ -545,7 +559,7 @@ function handleDevTestMessage(ui: ChatUI) {
     const randomResponse = responses[Math.floor(Math.random() * responses.length)];
     const quickReplies = ['Tell me more', 'What else?', 'Thanks', 'Goodbye'];
     
-    addMessage(ui.chat, randomResponse, 'bot', quickReplies);
+    addMessage(ui.chat, randomResponse, 'bot', quickReplies, undefined, ui);
   },  Math.random() * 1000); // Random delay between 1-3 seconds
 }
 
@@ -584,7 +598,8 @@ export async function initWebchat(endpointURL: string) {
       colors: {
         header: "#667eea",
         message: {
-          user: "#667eea"
+          user: "#667eea",
+          bot: "#4a5568"
         }
       },
       inputFieldMessage: "Type your message...",

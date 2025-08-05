@@ -20,6 +20,7 @@
   /* Background Colors */
   --header-bg: var(--primary-gradient);
   --user-message-bg: var(--primary-gradient);
+  --bot-message-bg: var(--primary-gradient);
   --chat-bubble-bg: var(--primary-gradient);
   
   /* Default Background Colors */
@@ -116,6 +117,17 @@ body {
   50% { transform: translateY(-20px); }
   75% { transform: translateY(-15px); }
   100% { transform: translateY(0px); }
+}
+
+@keyframes quickRepliesSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ========================================
@@ -843,8 +855,8 @@ body {
 }
 
 .message.bot .bubble {
-  background: var(--white);
-  color: var(--dark-gray);
+  background: var(--bot-message-bg);
+  color: var(--white);
   border-bottom-left-radius: var(--radius-sm);
   border: 1px solid #e2e8f0;
   margin-right: auto;
@@ -863,10 +875,13 @@ body {
   flex-wrap: wrap;
   max-width: 100%;
   margin-top: var(--spacing-xs);
+  opacity: 0;
+  transform: translateY(10px);
+  animation: quickRepliesSlideIn 0.5s ease forwards;
 }
 
 .quick-reply-btn {
-  background: var(--white);
+  /* background: var(--white); */
   color: var(--primary-color);
   border: 2px solid #e2e8f0;
   border-radius: var(--radius-lg);
@@ -1076,7 +1091,7 @@ body {
    DARK MODE SUPPORT
    ======================================== */
 
-@media (prefers-color-scheme: dark) {
+/* @media (prefers-color-scheme: dark) {
   #chatContainer {
     background: #1a202c;
     border-color: rgba(255, 255, 255, 0.1);
@@ -1117,4 +1132,4 @@ body {
     background: var(--primary-color);
     color: var(--white);
   }
-}
+} */
