@@ -152,6 +152,8 @@ function createChatUI(settings: EndpointSettings): ChatUI {
   // Check if we're on mobile (width < 600px)
   const isMobile = window.innerWidth < 600;
 
+  chatContainer.classList.add('webchat-visible'); // TODO: remove this
+  
   chatContainer.innerHTML = `
     <div id="header">
       <span>${settings.chatbotName}</span>
