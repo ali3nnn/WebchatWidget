@@ -223,8 +223,8 @@ function createChatUI(settings: EndpointSettings): ChatUI {
   webchatWrapper.id = 'webchatWrapper';
   
   // Apply themes - default to circle bubble and small container
-  const bubbleTheme = settings.chatBubbleTheme || 'theme-chatbubble-circle';
-  const containerTheme = settings.chatContainerTheme || 'theme-container-small';
+  const bubbleTheme = settings.chatBubbleTheme || 'theme-chatbubble-default';
+  const containerTheme = settings.chatContainerTheme || 'theme-container-default';
   webchatWrapper.className = `${bubbleTheme} ${containerTheme}`;
   
   // Add both elements to the wrapper
@@ -564,8 +564,17 @@ export async function initWebchat(endpointURL: string) {
     return;
   }
 
+  const url = new URL(endpointURL);
+  const basePath = url.origin;
+  const endpointID = url.pathname.replace("/", "");
+
+  if (!endpointID) {
+    console.error('⚠️ Missing "endpointID" in the query parameters.');
+    return;
+  }
+
   // Check if we're in dev test mode
-  const isDevTestMode = endpointURL === 'DEV_TEST_MODE';
+  const isDevTestMode = endpointID === 'DEV_TEST_MODE';
   
   if (isDevTestMode) {
     log('🧪 Initializing Webchat in DEV_TEST_MODE');
@@ -582,23 +591,11 @@ export async function initWebchat(endpointURL: string) {
       sendButton: "Send",
       chatBubbleTheme: 'theme-chatbubble-modern',
       chatContainerTheme: 'theme-container-modern',
-      // chatContainerTheme: 'theme-container-big',
       enableJumpAnimation: false
     };
     
     const ui = createChatUI(devSettings);
     setupDevTestMode(ui);
-    return;
-  }
-
-  const url = new URL(endpointURL);
-  // const basePath = url.origin + url.pathname;
-  const basePath = url.origin;
-  // const { endpointID } = Object.fromEntries(url.searchParams.entries());
-  const endpointID = url.pathname.replace("/", "");
-
-  if (!endpointID) {
-    console.error('⚠️ Missing "endpointID" in the query parameters.');
     return;
   }
 
@@ -611,14 +608,14 @@ export async function initWebchat(endpointURL: string) {
     const data = await response.json();
     endpointSettings = {
       ...data.settings,
-      enableJumpAnimation: false,
+      // enableJumpAnimation: false,
       // chatBubbleTheme: 'theme-chatbubble-circle',
       // chatBubbleTheme: 'theme-chatbubble-pill',
-      chatBubbleTheme: 'theme-chatbubble-modern',
+      // chatBubbleTheme: 'theme-chatbubble-modern',
       // chatContainerTheme: 'theme-container-big',
       // chatContainerTheme: 'theme-container-small',
-      chatContainerTheme: 'theme-container-modern',
-      chatBubblePillMessage: 'Need help? Chat with us!'
+      // chatContainerTheme: 'theme-container-modern',
+      // chatBubblePillMessage: 'Need help? Chat with us!'
     };
   } catch (error) {
     console.error('❌ Error making GET request:', error);

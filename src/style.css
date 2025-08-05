@@ -141,6 +141,31 @@ body {
    CHAT BUBBLE THEMES
    ======================================== */
 
+/* Default Chat Bubble (when no theme is applied) */
+#webchatWrapper #chatBubble {
+  width: 60px;
+  height: 60px;
+  background: var(--chat-bubble-bg);
+  border-radius: var(--radius-full);
+  color: var(--white);
+  font-size: 24px;
+  box-shadow: 
+    0 10px 25px var(--shadow-primary),
+    0 4px 10px var(--shadow-light);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#webchatWrapper #chatBubble:hover {
+  box-shadow: 
+    0 15px 35px var(--shadow-primary-hover),
+    0 8px 15px var(--shadow-medium);
+}
+
 /* Chat Bubble Theme - Circle */
 #webchatWrapper.theme-chatbubble-circle #chatBubble {
   width: 60px;
@@ -748,7 +773,7 @@ body {
   overflow: hidden;
 }
 
-#sendBtn::before {
+/* #sendBtn::before {
   content: '';
   position: absolute;
   top: 0;
@@ -757,7 +782,7 @@ body {
   height: 100%;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
   transition: left var(--transition-slow);
-}
+} */
 
 #sendBtn:hover::before {
   left: 100%;
