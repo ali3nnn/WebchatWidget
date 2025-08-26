@@ -89,12 +89,12 @@ export class EventHandlers {
    * Toggles the action area visibility and button rotation
    */
   private static setupPlusButton(ui: ChatUI): void {
-    ui.plusBtn.addEventListener('click', () => {
+    ui.plusBtn?.addEventListener('click', () => {
       const actionArea = document.getElementById('actionArea');
       if (actionArea) {
         actionArea.classList.toggle('action-hidden');
         const isHidden = actionArea.classList.contains('action-hidden');
-        ui.plusBtn.classList.toggle('rotated', !isHidden);
+        ui.plusBtn?.classList.toggle('rotated', !isHidden);
       }
     });
   }
@@ -127,7 +127,7 @@ export class EventHandlers {
   private static handleDevTestMessage(ui: ChatUI, messageQueueManager: MessageQueueManager): void {
     const text = ui.input.value.trim();
     if (!text) return;
-    
+
     messageQueueManager.addMessage({
       chatElement: ui.chat,
       text,
@@ -152,10 +152,10 @@ export class EventHandlers {
         "That's helpful information. What's next?",
         "I'm here to support you. What would you like to explore?"
       ];
-      
+
       const randomResponse = responses[Math.floor(Math.random() * responses.length)];
       const quickReplies = ['Tell me more', 'What else?', 'Thanks', 'Goodbye'];
-      
+
       messageQueueManager.addMessage({
         chatElement: ui.chat,
         text: randomResponse,

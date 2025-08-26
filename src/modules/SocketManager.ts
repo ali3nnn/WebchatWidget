@@ -42,7 +42,7 @@ export class SocketManager {
       Logger.log('⚠️ Connection Error:', err.message);
     });
 
-    socket.on('message', (msg: { text: string; quickReplies?: string[] }) => {
+    socket.on('message', (msg: { text: string; quickReplies: string[] }) => {
       if (!msg || typeof msg.text !== 'string') {
         console.warn('Invalid message format:', msg);
         return;
@@ -50,11 +50,12 @@ export class SocketManager {
       console.log("Message received:", msg)
       messageQueueManager.addMessage({
         chatElement: ui.chat,
-        text: msg.text,
         sender: 'bot',
-        quickReplies: msg.quickReplies || [],
         socket,
-        ui
+        ui,
+        // text: msg.text,
+        // quickReplies: msg.quickReplies || [],
+        ...msg,
       });
     });
 

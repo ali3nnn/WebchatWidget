@@ -19,6 +19,7 @@ export class MessageQueueManager {
      * @param message - The message data to add to the queue
      */
     addMessage(message: MessageData): void {
+        console.log("Adding message to queue:", message);
         this.messageQueue.push(message);
         if (!this.isTyping) {
             this.processMessageQueue();
@@ -46,11 +47,11 @@ export class MessageQueueManager {
         wrapper.appendChild(bubble);
 
         if (message.sender === 'bot') {
-            TypewriterEffect.apply(bubble, message.text, () => {
-                this.addQuickReplies(wrapper, message);
-                this.isTyping = false;
-                this.processMessageQueue();
-            });
+            // Typing effect disabled - show message immediately
+            bubble.textContent = message.text;
+            this.addQuickReplies(wrapper, message);
+            this.isTyping = false;
+            this.processMessageQueue();
         } else {
             bubble.textContent = message.text;
             this.isTyping = false;
@@ -66,7 +67,7 @@ export class MessageQueueManager {
      * Creates interactive buttons for user responses
      */
     private addQuickReplies(wrapper: HTMLElement, message: MessageData): void {
-        if (message.quickReplies.length > 0 && message.socket && message.ui) {
+        if (message.quickReplies?.length > 0 && message.socket && message.ui) {
             Logger.log('Adding quick replies:', message.quickReplies);
             const qrContainer = document.createElement('div');
             qrContainer.className = 'quick-replies';

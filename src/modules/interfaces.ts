@@ -15,7 +15,7 @@ export interface ChatUI {
   chat: HTMLElement;
   input: HTMLInputElement;
   sendBtn: HTMLButtonElement;
-  plusBtn: HTMLButtonElement;
+  plusBtn?: HTMLButtonElement; // Optional since it may not exist when additionalInput is false
 }
 
 /**
@@ -40,6 +40,7 @@ export interface EndpointSettings {
   chatBubbleTheme?: string;
   chatContainerTheme?: string;
   enableJumpAnimation?: boolean;
+  additionalInput?: boolean;
 }
 
 /**

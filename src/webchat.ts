@@ -8,13 +8,11 @@ import {
   ChatUIBuilder,
   SocketManager,
   EventHandlers,
-  DevTestMode,
   EndpointSettings
 } from './modules';
 
 /**
  * Main entry point for the webchat widget
- * Initializes the chat interface and handles both dev and production modes
  */
 
 // ========================================
@@ -45,33 +43,7 @@ export async function initWebchat(endpointURL: string): Promise<void> {
     console.error('⚠️ Missing "endpointID" in the query parameters.');
     return;
   }
-
-  const isDevTestMode = endpointID === 'DEV_TEST_MODE';
   
-  if (isDevTestMode) {
-    Logger.log('🧪 Initializing Webchat in DEV_TEST_MODE');
-    const devSettings: EndpointSettings = {
-      flow: "dev-test",
-      chatbotName: "Dev Test Bot",
-      colors: {
-        header: "#667eea",
-        message: {
-          user: "#667eea",
-          bot: "#4a5568"
-        }
-      },
-      inputFieldMessage: "Type your message...",
-      sendButton: "Send",
-      chatBubbleTheme: 'theme-chatbubble-modern',
-      chatContainerTheme: 'theme-container-modern',
-      enableJumpAnimation: false
-    };
-    
-    const ui = ChatUIBuilder.create(devSettings);
-    DevTestMode.setup(ui, messageQueueManager);
-    return;
-  }
-
   let endpointSettings: EndpointSettings;
   try {
     const response = await fetch(endpointURL);
@@ -80,27 +52,21 @@ export async function initWebchat(endpointURL: string): Promise<void> {
     }
     const data = await response.json();
 
+    // @ts-ignore
     endpointSettings = {
       ...data.settings,
-      // colors: {
-        // header: "#667eea",
-        // message: {
-          // user: "#667eea",
-          // bot: "#4a5568"
-        // }
-      // },
-      chatBubbleTheme: 'theme-chatbubble-modern',
-      chatContainerTheme: 'theme-container-modern',
-      enableJumpAnimation: false
+      enableJumpAnimation: false,
+      additionalInput: false
     };
+
+    // console.log("Endpoint URL:", endpointURL)
+    console.log("Endpoint Settings:", endpointSettings)
   } catch (error) {
     console.error('❌ Error making GET request:', error);
     return;
   }
 
   Logger.log('Initializing Webchat');
-
-  console.log("Endpoint Settings", endpointSettings)
 
   const ui = ChatUIBuilder.create(endpointSettings);
   let socket: Socket | null = null;

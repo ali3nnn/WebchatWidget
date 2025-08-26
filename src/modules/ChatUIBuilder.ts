@@ -32,7 +32,7 @@ export class ChatUIBuilder {
       chat: chatContainer.querySelector<HTMLElement>('#chat')!,
       input: chatContainer.querySelector<HTMLInputElement>('#input')!,
       sendBtn: chatContainer.querySelector<HTMLButtonElement>('#sendBtn')!,
-      plusBtn: chatContainer.querySelector<HTMLButtonElement>('#plusBtn')!
+      plusBtn: chatContainer.querySelector<HTMLButtonElement>('#plusBtn') || undefined
     };
   }
 
@@ -41,10 +41,15 @@ export class ChatUIBuilder {
    * Converts color settings to CSS variables
    */
   private static injectStyles(settings: EndpointSettings): void {
-    const headerGradient = ColorUtils.createGradient(settings.colors.header);
-    const userMessageGradient = ColorUtils.createGradient(settings.colors.message.user);
-    const botMessageGradient = ColorUtils.createGradient(settings.colors.message.bot);
-    const chatBubbleGradient = ColorUtils.createGradient(settings.colors.chatBubble || settings.colors.header);
+    // const headerGradient = ColorUtils.createGradient(settings.colors.header);
+    // const userMessageGradient = ColorUtils.createGradient(settings.colors.message.user);
+    // const botMessageGradient = ColorUtils.createGradient(settings.colors.message.bot);
+    // const chatBubbleGradient = ColorUtils.createGradient(settings.colors.chatBubble || settings.colors.header);
+    console.log("Injecting styles with settings:", settings)
+    const headerGradient = settings.colors.header;
+    const userMessageGradient = settings.colors.message.user;
+    const botMessageGradient = settings.colors.message.bot;
+    const chatBubbleGradient = settings.colors.chatBubble || settings.colors.header;
 
     const root = document.documentElement;
     root.style.setProperty('--header-bg', headerGradient);
@@ -69,7 +74,7 @@ export class ChatUIBuilder {
       </div>
       <div id="chat" class="chat-box" data-chatbot-name="${settings.chatbotName}"></div>
       <div id="inputArea" class="input-area">
-        <button id="plusBtn" class="plus-btn">${SVG_ASSETS.plus}</button>
+        ${settings.additionalInput !== false ? `<button id="plusBtn" class="plus-btn">${SVG_ASSETS.plus}</button>` : ''}
         <input id="input" type="text" placeholder="${settings.inputFieldMessage}" autocomplete="off" />
         <button id="sendBtn">${SVG_ASSETS.airplane}</button>
       </div>
