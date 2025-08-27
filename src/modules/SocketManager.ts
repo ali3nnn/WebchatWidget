@@ -1,6 +1,6 @@
 import { io, Socket } from 'socket.io-client';
 import { ChatUI } from './interfaces';
-import { Logger } from './utils';
+import { Logger, SessionUtils } from './utils';
 import { MessageQueueManager } from './MessageQueueManager';
 
 // ========================================
@@ -23,7 +23,7 @@ export class SocketManager {
   static createConnection(basePath: string, endpointID: string, ui: ChatUI, messageQueueManager: MessageQueueManager): Socket {
     Logger.log('endpointID', endpointID);
     const socket = io(basePath, {
-      auth: { endpoint: endpointID },
+      auth: { endpoint: endpointID, sessionId: SessionUtils.getBrainigySessionId() },
       reconnectionAttempts: 3,
       reconnectionDelay: 2000
     });

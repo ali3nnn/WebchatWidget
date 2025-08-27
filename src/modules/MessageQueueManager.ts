@@ -1,5 +1,5 @@
 import { MessageData } from './interfaces';
-import { Logger } from './utils';
+import { Logger, SessionUtils, ConversationManager } from './utils';
 import { TypewriterEffect } from './TypewriterEffect';
 
 // ========================================
@@ -60,6 +60,15 @@ export class MessageQueueManager {
 
         message.chatElement.appendChild(wrapper);
         message.chatElement.scrollTop = message.chatElement.scrollHeight;
+
+        // Save message to localStorage
+        const sessionId = SessionUtils.getBrainigySessionId();
+        ConversationManager.saveMessage(sessionId, {
+            text: message.text,
+            sender: message.sender,
+            timestamp: new Date().toISOString(),
+            quickReplies: message.quickReplies
+        });
     }
 
     /**

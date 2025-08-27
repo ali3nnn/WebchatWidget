@@ -8,7 +8,9 @@ import {
   ChatUIBuilder,
   SocketManager,
   EventHandlers,
-  EndpointSettings
+  EndpointSettings,
+  SessionUtils,
+  ConversationManager
 } from './modules';
 
 /**
@@ -88,7 +90,36 @@ export async function initWebchat(endpointURL: string): Promise<void> {
 declare global {
   interface Window {
     initWebchat?: (url: string) => void;
+    webchatConversation?: {
+      getSessionId: () => string;
+      getConversation: () => any[];
+      clearConversation: () => void;
+      exportConversation: () => string;
+    };
   }
 }
 
 window.initWebchat = initWebchat;
+
+// Expose conversation management for debugging
+window.webchatConversation = {
+  getSessionId: () => SessionUtils.getBrainigySessionId(),
+  getConversation: () => {
+    const sessionId = SessionUtils.getBrainigySessionId();
+    return ConversationManager.getConversation(sessionId);
+  },
+  clearConversation: () => {
+    const sessionId = SessionUtils.getBrainigySessionId();
+    ConversationManager.clearConversation(sessionId);
+    // Clear the chat UI if it exists
+    const chatElement = document.querySelector('#chat');
+    if (chatElement) {
+      chatElement.innerHTML = '';
+    }
+  },
+  exportConversation: () => {
+    const sessionId = SessionUtils.getBrainigySessionId();
+    const conversation = ConversationManager.getConversation(sessionId);
+    return JSON.stringify(conversation, null, 2);
+  }
+};

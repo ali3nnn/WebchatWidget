@@ -25,6 +25,147 @@ export class Logger {
 }
 
 /**
+ * Utility for generating UUIDs and managing session storage
+ */
+export class SessionUtils {
+  /**
+   * Generates a proper UUID v4
+   * @returns A random UUID v4 string
+   */
+  static generateUUID(): string {
+    // Use crypto.randomUUID if available (modern browsers)
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+      return crypto.randomUUID();
+    }
+    
+    // Fallback to manual UUID generation for older browsers
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0;
+      const v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+
+  /**
+   * Creates or retrieves the brainigy_sessionId from sessionStorage
+   * @returns The session ID
+   */
+  static getBrainigySessionId(): string {
+    const existingSessionId = sessionStorage.getItem('brainigy_sessionId');
+    if (existingSessionId) {
+      return existingSessionId;
+    }
+    
+    const newSessionId = this.generateUUID();
+    sessionStorage.setItem('brainigy_sessionId', newSessionId);
+    Logger.log('🆔 Created new brainigy_sessionId:', newSessionId);
+    return newSessionId;
+  }
+}
+
+/**
+ * Manages conversation storage and retrieval from localStorage
+ */
+export class ConversationManager {
+  private static readonly CONVERSATION_PREFIX = 'brainigy_conversation_';
+
+  /**
+   * Gets the localStorage key for a session's conversation
+   */
+  private static getConversationKey(sessionId: string): string {
+    return `${this.CONVERSATION_PREFIX}${sessionId}`;
+  }
+
+  /**
+   * Saves a message to the conversation history
+   */
+  static saveMessage(sessionId: string, message: { text: string; sender: 'user' | 'bot'; timestamp: string; quickReplies?: string[] }): void {
+    const key = this.getConversationKey(sessionId);
+    const conversation = this.getConversation(sessionId);
+    conversation.push(message);
+    
+    try {
+      localStorage.setItem(key, JSON.stringify(conversation));
+      Logger.log('💾 Message saved to conversation:', message.text.substring(0, 50) + '...');
+    } catch (error) {
+      console.warn('Failed to save conversation to localStorage:', error);
+    }
+  }
+
+  /**
+   * Retrieves the conversation history for a session
+   */
+  static getConversation(sessionId: string): Array<{ text: string; sender: 'user' | 'bot'; timestamp: string; quickReplies?: string[] }> {
+    const key = this.getConversationKey(sessionId);
+    
+    try {
+      const stored = localStorage.getItem(key);
+      if (stored) {
+        const conversation = JSON.parse(stored);
+        Logger.log('📚 Retrieved conversation with', conversation.length, 'messages');
+        return conversation;
+      }
+    } catch (error) {
+      console.warn('Failed to retrieve conversation from localStorage:', error);
+    }
+    
+    return [];
+  }
+
+  /**
+   * Clears the conversation history for a session
+   */
+  static clearConversation(sessionId: string): void {
+    const key = this.getConversationKey(sessionId);
+    localStorage.removeItem(key);
+    Logger.log('🗑️ Conversation cleared for session:', sessionId);
+  }
+
+  /**
+   * Restores conversation messages to the chat container
+   */
+  static restoreConversation(sessionId: string, chatElement: HTMLElement): void {
+    const conversation = this.getConversation(sessionId);
+    
+    if (conversation.length > 0) {
+      Logger.log('🔄 Restoring', conversation.length, 'messages to chat');
+      
+      conversation.forEach(message => {
+        const wrapper = document.createElement('div');
+        wrapper.className = `message ${message.sender}`;
+
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble';
+        bubble.textContent = message.text;
+
+        wrapper.appendChild(bubble);
+
+        // Add quick replies if they exist for bot messages
+        if (message.sender === 'bot' && message.quickReplies && message.quickReplies.length > 0) {
+          const qrContainer = document.createElement('div');
+          qrContainer.className = 'quick-replies';
+          
+          message.quickReplies.forEach(reply => {
+            const btn = document.createElement('button');
+            btn.className = 'quick-reply-btn disabled'; // Add disabled class for restored messages
+            btn.textContent = reply;
+            btn.disabled = true; // Disable interaction with restored quick replies
+            qrContainer.appendChild(btn);
+          });
+          
+          wrapper.appendChild(qrContainer);
+        }
+
+        chatElement.appendChild(wrapper);
+      });
+
+      // Scroll to bottom after restoring messages
+      chatElement.scrollTop = chatElement.scrollHeight;
+    }
+  }
+}
+
+/**
  * Utility for creating gradient colors from single color values
  * Converts hex, HSL, and gradient colors to consistent gradient format
  */

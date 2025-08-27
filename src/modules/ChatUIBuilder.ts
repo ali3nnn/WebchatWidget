@@ -1,5 +1,5 @@
 import { ChatUI, EndpointSettings } from './interfaces';
-import { ColorUtils } from './utils';
+import { ColorUtils, SessionUtils, ConversationManager } from './utils';
 import { SVG_ASSETS } from './constants';
 
 // ========================================
@@ -17,6 +17,9 @@ export class ChatUIBuilder {
    * @returns ChatUI object with all DOM element references
    */
   static create(settings: EndpointSettings): ChatUI {
+    // Create brainigy_sessionId when chat bubble is created
+    const sessionId = SessionUtils.getBrainigySessionId();
+    
     this.injectStyles(settings);
     const chatContainer = this.createChatContainer(settings);
     const chatBubble = this.createChatBubble(settings);
@@ -25,7 +28,7 @@ export class ChatUIBuilder {
     document.body.appendChild(webchatWrapper);
     this.setupJumpAnimation(chatBubble, settings);
     
-    return {
+    const ui = {
       webchatWrapper,
       chatBubble,
       chatContainer,
@@ -34,6 +37,11 @@ export class ChatUIBuilder {
       sendBtn: chatContainer.querySelector<HTMLButtonElement>('#sendBtn')!,
       plusBtn: chatContainer.querySelector<HTMLButtonElement>('#plusBtn') || undefined
     };
+
+    // Restore conversation if it exists for this session
+    ConversationManager.restoreConversation(sessionId, ui.chat);
+    
+    return ui;
   }
 
   /**
