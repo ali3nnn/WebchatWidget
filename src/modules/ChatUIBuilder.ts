@@ -41,6 +41,9 @@ export class ChatUIBuilder {
     // Restore conversation if it exists for this session
     ConversationManager.restoreConversation(sessionId, ui.chat);
     
+    // Setup scroll-to-bottom button
+    this.setupScrollButton(ui.chat);
+    
     return ui;
   }
 
@@ -80,7 +83,13 @@ export class ChatUIBuilder {
         <span class="header-title">${settings.chatbotName}</span>
         <button class="close-btn">${SVG_ASSETS.plus}</button>
       </div>
-      <div id="chat" class="chat-box" data-chatbot-name="${settings.chatbotName}"></div>
+      <div id="chat" class="chat-box" data-chatbot-name="${settings.chatbotName}">
+        <button id="scrollDownBtn" class="scroll-down-btn" style="display: none;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 5V19M12 19L19 12M12 19L5 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
       <div id="inputArea" class="input-area">
         ${settings.additionalInput !== false ? `<button id="plusBtn" class="plus-btn">${SVG_ASSETS.plus}</button>` : ''}
         <input id="input" type="text" placeholder="${settings.inputFieldMessage}" autocomplete="off" />
@@ -138,7 +147,8 @@ export class ChatUIBuilder {
     webchatWrapper.id = 'webchatWrapper';
     
     const bubbleTheme = settings.chatBubbleTheme || 'theme-chatbubble-default';
-    const containerTheme = settings.chatContainerTheme || 'theme-container-default';
+    // const containerTheme = settings.chatContainerTheme || 'theme-container-default';
+    const containerTheme = settings.chatContainerTheme || 'theme-container-modern';
     webchatWrapper.className = `${bubbleTheme} ${containerTheme}`;
     
     webchatWrapper.appendChild(chatBubble);
@@ -171,5 +181,44 @@ export class ChatUIBuilder {
       hasBeenClicked = true;
       clearTimeout(jumpTimer);
     });
+  }
+
+  /**
+   * Sets up the scroll-to-bottom button functionality
+   * Shows button when user scrolls up, hides when at bottom
+   */
+  private static setupScrollButton(chatElement: HTMLElement): void {
+    const scrollDownBtn = chatElement.querySelector<HTMLButtonElement>('#scrollDownBtn');
+    
+    if (!scrollDownBtn) return;
+
+    // Function to check if user is at bottom of chat
+    const isAtBottom = (): boolean => {
+      const threshold = 100; // pixels from bottom to consider "at bottom"
+      return chatElement.scrollHeight - chatElement.scrollTop - chatElement.clientHeight < threshold;
+    };
+
+    // Function to update button visibility
+    const updateButtonVisibility = (): void => {
+      if (isAtBottom()) {
+        scrollDownBtn.style.display = 'none';
+      } else {
+        scrollDownBtn.style.display = 'flex';
+      }
+    };
+
+    // Scroll to bottom when button is clicked
+    scrollDownBtn.addEventListener('click', () => {
+      chatElement.scrollTo({
+        top: chatElement.scrollHeight,
+        behavior: 'smooth'
+      });
+    });
+
+    // Update button visibility on scroll
+    chatElement.addEventListener('scroll', updateButtonVisibility);
+
+    // Initial check
+    updateButtonVisibility();
   }
 } 

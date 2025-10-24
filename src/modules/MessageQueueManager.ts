@@ -13,6 +13,7 @@ import { TypewriterEffect } from './TypewriterEffect';
 export class MessageQueueManager {
     private messageQueue: MessageData[] = [];
     private isTyping = false;
+    private currentStreamMessage: { wrapper: HTMLElement; bubble: HTMLElement; text: string; streamId: string } | null = null;
 
     /**
      * Adds a message to the queue and processes it if not currently typing
@@ -24,6 +25,97 @@ export class MessageQueueManager {
         if (!this.isTyping) {
             this.processMessageQueue();
         }
+    }
+
+    /**
+     * Adds a streaming message that updates in real-time
+     * @param message - The streaming message data to add
+     */
+    addStreamMessage(message: MessageData): void {
+        console.log("Adding streaming message:", message);
+
+        // Extract streamId from customData
+        const streamId = (message as any).customData?.streamId;
+
+        if (!streamId) {
+            console.warn('Stream message missing streamId, treating as regular message');
+            this.addMessage(message);
+            return;
+        }
+
+        // Check if this is a new stream or continuation of existing stream
+        const isNewStream = !this.currentStreamMessage || this.currentStreamMessage.streamId !== streamId;
+
+        if (isNewStream) {
+            // Finalize previous stream if exists (this will save it)
+            if (this.currentStreamMessage) {
+                console.log('New stream detected, finalizing previous stream:', this.currentStreamMessage.streamId);
+                this.finalizeStreamMessage(message, this.currentStreamMessage.streamId);
+            }
+
+            // Create a new stream message bubble
+            const wrapper = document.createElement('div');
+            wrapper.className = `message ${message.sender}`;
+
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+
+            wrapper.appendChild(bubble);
+            message.chatElement.appendChild(wrapper);
+
+            this.currentStreamMessage = {
+                wrapper,
+                bubble,
+                text: message.text,
+                streamId
+            };
+
+            bubble.textContent = message.text;
+        } else if (this.currentStreamMessage) {
+            // Append to existing stream message with the same streamId
+            this.currentStreamMessage.text += message.text;
+            this.currentStreamMessage.bubble.textContent = this.currentStreamMessage.text;
+        }
+
+        // Scroll to bottom
+        message.chatElement.scrollTop = message.chatElement.scrollHeight;
+
+        // Note: We don't save here - saving happens only when stream is finalized
+    }
+
+    /**
+     * Finalizes the current streaming message and adds quick replies if needed
+     * Saves the complete message to localStorage
+     * @param message - The final message data with quick replies
+     * @param streamId - Optional streamId to finalize specific stream
+     */
+    finalizeStreamMessage(message?: MessageData, streamId?: string): void {
+        // If streamId is provided, only finalize if it matches current stream
+        if (streamId && this.currentStreamMessage && this.currentStreamMessage.streamId !== streamId) {
+            console.log('StreamId mismatch, not finalizing:', { expected: streamId, current: this.currentStreamMessage.streamId });
+            return;
+        }
+
+        if (this.currentStreamMessage) {
+            // Add quick replies if provided
+            if (message) {
+                this.addQuickReplies(this.currentStreamMessage.wrapper, message);
+            }
+
+            // Save the complete streamed message to localStorage
+            const sessionId = SessionUtils.getBrainigySessionId();
+            ConversationManager.saveMessage(sessionId, {
+                text: this.currentStreamMessage.text,
+                sender: message?.sender || 'bot',
+                timestamp: new Date().toISOString(),
+                quickReplies: message?.quickReplies,
+                customData: { streamId: this.currentStreamMessage.streamId }
+            });
+
+            console.log('💾 Complete stream message saved:', this.currentStreamMessage.streamId);
+        }
+
+        this.currentStreamMessage = null;
     }
 
     /**
@@ -67,7 +159,8 @@ export class MessageQueueManager {
             text: message.text,
             sender: message.sender,
             timestamp: new Date().toISOString(),
-            quickReplies: message.quickReplies
+            quickReplies: message.quickReplies,
+            customData: message.customData
         });
     }
 
@@ -108,4 +201,4 @@ export class MessageQueueManager {
         //   Logger.log('No quick replies to add. Length:', message.quickReplies.length, 'Socket:', !!message.socket, 'UI:', !!message.ui);
         // }
     }
-} 
+}

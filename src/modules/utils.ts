@@ -79,7 +79,7 @@ export class ConversationManager {
   /**
    * Saves a message to the conversation history
    */
-  static saveMessage(sessionId: string, message: { text: string; sender: 'user' | 'bot'; timestamp: string; quickReplies?: string[] }): void {
+  static saveMessage(sessionId: string, message: { text: string; sender: 'user' | 'bot'; timestamp: string; quickReplies?: string[], customData?: object }): void {
     const key = this.getConversationKey(sessionId);
     const conversation = this.getConversation(sessionId);
     conversation.push(message);

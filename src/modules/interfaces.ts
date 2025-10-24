@@ -54,4 +54,5 @@ export interface MessageData {
   quickReplies: string[];
   socket?: Socket;
   ui?: ChatUI;
+  customData?: object;
 } 

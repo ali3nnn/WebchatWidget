@@ -42,21 +42,33 @@ export class SocketManager {
       Logger.log('⚠️ Connection Error:', err.message);
     });
 
-    socket.on('message', (msg: { text: string; quickReplies: string[] }) => {
-      if (!msg || typeof msg.text !== 'string') {
+    socket.on('message', (msg: { text: string; quickReplies: string[]; customData?: { streaming?: boolean; streamId?: string } }) => {
+      if (!msg || typeof msg.text !== 'string' || msg.text === null || msg.text === undefined) {
         console.warn('Invalid message format:', msg);
         return;
       }
+      
+      // Skip empty or whitespace-only messages
+      if (msg.text.trim().length === 0 || msg.text === "undefined" || msg.text === "null") {
+        console.warn('Empty message received, skipping:', msg);
+        return;
+      }
+      
       console.log("Message received:", msg)
-      messageQueueManager.addMessage({
+      
+      const messageData = {
         chatElement: ui.chat,
-        sender: 'bot',
+        sender: 'bot' as const,
         socket,
         ui,
-        // text: msg.text,
-        // quickReplies: msg.quickReplies || [],
         ...msg,
-      });
+      };
+
+      if (msg.customData?.streaming) {
+        messageQueueManager.addStreamMessage(messageData);
+      } else {
+        messageQueueManager.addMessage(messageData);
+      }
     });
 
     return socket;
