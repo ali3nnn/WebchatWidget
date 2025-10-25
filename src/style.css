@@ -404,7 +404,8 @@ body {
   left: 0;
   right: 0;
   padding: var(--spacing-lg) var(--spacing-lg);
-  background: var(--primary-gradient);
+  /* background: var(--primary-gradient); */
+  background: var(--header-bg);
   color: var(--white);
   z-index: 15;
   display: flex;
@@ -441,7 +442,7 @@ body {
   bottom: 0;
   left: 0;
   right: 0;
-  padding: var(--spacing-sm) var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-xl);
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(10px);
   border-radius: 20px;
